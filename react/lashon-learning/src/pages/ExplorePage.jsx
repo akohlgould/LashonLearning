@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
-import { getImportantLexiconInformation, getVerses } from "../../../../scripts/getdata";
+import { getImportantLexiconInformation, getVerses } from "../services/sefariaApi";
 import { sanitizeHtml, toSefariaUrl } from "../utils/sefaria";
 
 export default function ExplorePage() {

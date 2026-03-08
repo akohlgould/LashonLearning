@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, RefreshCw, Plus, Share2, Download, X, Check, BookOpen } from "lucide-react";
 import { useSearchParams, Link } from "react-router-dom";
-
-function encodeWordList(wordList) {
-  return btoa(encodeURIComponent(JSON.stringify(wordList)));
-}
-
-function decodeWordList(encoded) {
-  return JSON.parse(decodeURIComponent(atob(encoded)));
-}
+import { encodeWordList, decodeWordList } from "../utils/helpers";
+import { EXTENSION_ID } from "../constants";
 
 export default function WordlistPage({
   words,
@@ -78,8 +72,6 @@ export default function WordlistPage({
       setTimeout(() => setCopied(false), 2000);
     }
   };
-
-  const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
 
   const removeWord = async (wordToRemove) => {
     if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {

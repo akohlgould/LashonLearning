@@ -137,21 +137,18 @@ async function getDefinition(word) {
 
     const topSenses = jsonData?.[0]?.content?.senses;
     if (!topSenses) return "Definition not available.";
-    
-    
+
+
     let parts = collectDefinitions(topSenses);
 
     parts = parts.filter((part) => {
       return !partsofspeech.has(part.trim().toLowerCase().replace(".", ""));
     });
 
-    console.log(parts);
-
     if (parts.length === 0) return "Definition not available.";
 
-    console.log(parts);
     return parts[0];
-    
+
   } catch (err) {
     console.error("Definition Error:", err);
     return "No definition found.";

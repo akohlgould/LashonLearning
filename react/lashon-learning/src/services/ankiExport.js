@@ -1,4 +1,4 @@
-import { getData } from "./getdata.js";
+import { getData } from "./sefariaApi";
 
 // internal helper: choose a random element
 function randomInArray(array) {
@@ -45,7 +45,6 @@ export async function exportToAnki(wordsOrData) {
       throw new Error("exportToAnki requires an array of words or a data object");
     }
 
-    console.log(data);
     const tsv = await convertToTSV(data);
     const blob = new Blob([tsv], { type: "text/tab-separated-values" });
 

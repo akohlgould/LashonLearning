@@ -1,14 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { getData } from "../../../../scripts/getdata";
-
-function shuffleArray(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+import { getData } from "../services/sefariaApi";
+import { shuffleArray, formatTime } from "../utils/helpers";
 
 export default function MatchingPage({ words, loading, emptyReason }) {
   const [cards, setCards] = useState([]); // loaded {word, definition} pairs
@@ -169,12 +161,6 @@ export default function MatchingPage({ words, loading, emptyReason }) {
     },
     [gameState, tiles, selected, matched, startTimer, stopTimer, bestTime],
   );
-
-  const formatTime = (t) => {
-    const s = Math.floor(t);
-    const ms = Math.floor((t % 1) * 10);
-    return `${s}.${ms}s`;
-  };
 
   const isLoading = loading || cardsLoading;
 
