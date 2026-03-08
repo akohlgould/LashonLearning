@@ -4,7 +4,7 @@ import { FaGlobe } from "react-icons/fa";
 import { FaUserCircle } from "react-icons/fa";
 import { FaQuestionCircle } from "react-icons/fa";
 import { CgMenuGridO } from "react-icons/cg";
-
+import { Link } from 'react-router-dom';
 const Header = () => {
   return (
     <header className="flex flex-1 px-7 align-baseline place-items-center gap-4 bg-white border-b-[#5794b1] border-b-4 h-16">
@@ -13,9 +13,9 @@ const Header = () => {
         Lashon Learning
       </h1>
       <div className="flex ml-6 gap-8 font-semibold text-[#666666]">
-        <span className="">Texts</span>
-        <span className="">Topics</span>
-        <span className="">Donate</span>
+        <Link to="/"><span className="">home</span></Link>
+        <Link to="/topics"><span className="">Topics</span></Link>
+        <Link to="/donate"><span className="">Donate</span></Link>
       </div>
 
       <div className="ml-auto text-[#666666] relative font-semibold flex gap-5 place-items-center">
