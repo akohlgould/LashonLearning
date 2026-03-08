@@ -5,7 +5,7 @@ async function getData(word) {
         // get the data from the url
         const data = await fetch(url);
         const jsonData = await data.json();
-        return { word: word, definition: getDefinition(jsonData), randomVerse: getRandomVerse(jsonData) };
+        return { word: word, definition: getDefinition(jsonData), refs: getRefs(jsonData) };
 }
 
 
@@ -18,15 +18,26 @@ function getDefinition(word){
 }
 
 // function to get 
-function getRandomVerse(word){
+function getRefs(word){
         // get a random verse from the tanakh
-        return word[0].refs[0];
+        const data = word[0].refs;
+
+
+        return data;
 }
 
-// // testing the function
-// async function main() {
-//         data = await getData("תורה");
-//         console.log(data.word + ": " + data.definition + " - " + data.randomVerse); 
+// testing the function
+async function main() {
+        const word = "למדות";
+
         
-// }
-// main();
+        // const url = "https://www.sefaria.org/api/words/" + word;
+        // const testdata = await fetch(url);
+        // const jsonData = await testdata.json();
+        // console.log(jsonData);
+
+        data = await getData(word);
+        console.log(data.word + ": " + data.definition + " - " + data.refs); 
+        
+}
+main();
