@@ -21,6 +21,7 @@ async function convertToTSV(data) {
 }
 
 export async function exportToAnki(data) {
+  try{
   console.log(data);
   const tsv = await convertToTSV(data);
   const blob = new Blob([tsv], { type: "text/tab-separated-values" });
@@ -35,9 +36,4 @@ export async function exportToAnki(data) {
     console.error("Anki export failed:", err);
     alert("Export failed. Make sure flashcards are fully loaded before exporting.");
   }
-}
-
-function randomInArray(array) {
-  const index = Math.floor(Math.random() * (array.length - 1));
-  return array[index];
 }
