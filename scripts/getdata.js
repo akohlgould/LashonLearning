@@ -42,13 +42,14 @@ async function getVerses(wordtoSearch){
                 });
 
                 const data = await response.json();
-                const verses = [];
+                const verses = {};
                 for (let i = 0; i < data.hits.hits.length; i++) {
-                        verses.push({ [data.hits.hits[i]._id]: data.hits.hits[i].highlight.naive_lemmatizer[0] });
+                        verses[data.hits.hits[i]._id] = data.hits.hits[i].highlight.naive_lemmatizer.join(" ");
                 }
                 return await cleanData(verses);
         } catch (err) {
                 console.error("Search Error:", err);
+                return [];
         }
 }
 

@@ -3,13 +3,13 @@ import React, { useMemo, useState } from "react";
 export default function Flashcard({
   word,
   definition,
-  sources = [],
+  sources = {},
   className = "",
   frontMode = "word",
 }) {
   const [showBack, setShowBack] = useState(false);
 
-  const hasSources = useMemo(() => sources.length > 0, [sources]);
+  const hasSources = useMemo(() => Object.keys(sources).length > 0, [sources]);
 
   const isWordFirst = frontMode === "word";
 
@@ -98,14 +98,15 @@ export default function Flashcard({
                 </div>
 
                 <div className="flex-1 overflow-y-auto rounded-xl border border-zinc-200 bg-zinc-50 p-3">
-                  <div className="flex flex-wrap gap-2">
-                    {sources.map((source, index) => (
-                      <span
-                        key={`${source}-${index}`}
-                        className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs text-zinc-600"
+                  <div className="flex flex-col gap-2">
+                    {Object.entries(sources).map(([name, verse]) => (
+                      <div
+                        key={name}
+                        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs text-zinc-600"
                       >
-                        {source}
-                      </span>
+                        <div className="font-medium text-zinc-700">{name}</div>
+                        <div className="mt-1" dangerouslySetInnerHTML={{ __html: verse }} />
+                      </div>
                     ))}
                   </div>
                 </div>
