@@ -8,25 +8,14 @@ export default function FlashcardsPage({
   loading,
   emptyReason,
   syncFromExtension,
-  generateFromWords,
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [frontMode, setFrontMode] = useState("word");
   const [cardKey, setCardKey] = useState(0);
-  const [customWords, setCustomWords] = useState("");
-  const [useCustom, setUseCustom] = useState(false);
 
   const handleRefresh = async () => {
     setCurrentIndex(0);
-    if (useCustom && customWords.trim()) {
-      const wordList = customWords
-        .split(/[\n,]+/)
-        .map((w) => w.trim())
-        .filter(Boolean);
-      await generateFromWords(wordList);
-    } else {
-      await syncFromExtension();
-    }
+    await syncFromExtension();
   };
 
   const totalCards = flashcards.length;
@@ -70,16 +59,6 @@ export default function FlashcardsPage({
             Refresh Flashcards
           </button>
 
-          <label className="inline-flex items-center gap-2 text-sm text-zinc-600 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={useCustom}
-              onChange={(e) => setUseCustom(e.target.checked)}
-              className="accent-primary"
-            />
-            Use typed words
-          </label>
-
           <div className="inline-flex rounded-xl border border-zinc-200 bg-zinc-50 p-1">
             <button
               onClick={() => {
@@ -109,17 +88,6 @@ export default function FlashcardsPage({
             Export Anki
           </button>
         </div>
-
-        {useCustom && (
-          <textarea
-            value={customWords}
-            onChange={(e) => setCustomWords(e.target.value)}
-            placeholder="Enter words separated by commas or newlines, e.g.&#10;אמר&#10;דבר&#10;עשה"
-            className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary"
-            rows={3}
-            dir="rtl"
-          />
-        )}
       </div>
 
       {/* Main Flashcard Display Area */}
@@ -165,7 +133,7 @@ export default function FlashcardsPage({
             <p className="text-zinc-500">
               {emptyReason === "no-words"
                 ? "No words found. Add words using the Sefaria Vocab Scraper extension, then press Refresh Flashcards."
-                : "Extension couldn't load. Type in words above and press Refresh Flashcards to get started."}
+                : "Extension couldn't load. Type in words in the word list page and press Refresh Flashcards to get started."}
             </p>
           </div>
         )}
