@@ -11,8 +11,7 @@ function App() {
       <Header />
       <Routes>
         <Route path="/" element={<FlashcardsPage />} />
-        <Route path="/topics" element={<div>Topics Page</div>} />
-        <Route path="/donate" element={<div>Donate Page</div>} />
+        <Route path="/wordlist" element={<div>Topics Page</div>} />
       </Routes>
     </Router>
   )

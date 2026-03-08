@@ -14,8 +14,7 @@ const Header = () => {
       </h1>
       <div className="flex ml-6 gap-8 font-semibold text-[#666666]">
         <Link to="/"><span className="">home</span></Link>
-        <Link to="/topics"><span className="">Topics</span></Link>
-        <Link to="/donate"><span className="">Donate</span></Link>
+        <Link to="/wordlist"><span className="">Topics</span></Link>
       </div>
 
       <div className="ml-auto text-[#666666] relative font-semibold flex gap-5 place-items-center">
