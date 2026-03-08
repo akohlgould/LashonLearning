@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Trash2, RefreshCw, Plus, Share2, Download, X, Check } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { Trash2, RefreshCw, Plus, Share2, Download, X, Check, BookOpen } from "lucide-react";
+import { useSearchParams, Link } from "react-router-dom";
 
 function encodeWordList(wordList) {
   return btoa(encodeURIComponent(JSON.stringify(wordList)));
@@ -265,6 +265,13 @@ export default function WordlistPage({
                     {word}
                   </p>
                 </div>
+                <Link
+                  to={`/wordlist/${encodeURIComponent(word)}`}
+                  className="flex-shrink-0 inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 hover:text-primary active:scale-95"
+                  aria-label={`Explore ${word}`}
+                >
+                  <BookOpen size={16} />
+                </Link>
               </div>
             ))}
           </div>

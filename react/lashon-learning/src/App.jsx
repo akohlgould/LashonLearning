@@ -3,6 +3,7 @@ import Header from './components/Header'
 import FlashcardsPage from './pages/FlashcardsPage'
 import WordlistPage from './pages/wordlistPage'
 import MatchingPage from './pages/MatchingPage'
+import ExplorePage from './pages/ExplorePage'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 
 const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
@@ -103,6 +104,7 @@ function App() {
             />
           }
         />
+        <Route path="/wordlist/:word" element={<ExplorePage />} />
       </Routes>
     </Router>
   )

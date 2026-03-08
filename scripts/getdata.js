@@ -156,8 +156,8 @@ async function getDefinition(word) {
   }
 }
 
-// function to get
-async function getVerses(wordtoSearch) {
+// function to get verses where the word appears
+export async function getVerses(wordtoSearch) {
   const url = sefariaUrl("/api/search-wrapper");
 
   const body = {
@@ -205,4 +205,229 @@ async function getVerses(wordtoSearch) {
   }
 }
 
-// NEW functions for the explore feature
+// Language mapping from parent_lexicon_details.language
+const LANGUAGE_MAP = {
+  "heb.modern": "Modern Hebrew",
+  "heb.biblical": "Biblical Hebrew",
+  "heb.talmudic": "Talmudic/Rabbinic",
+  "ara.biblical": "Biblical Aramaic",
+};
+
+// Sense language codes from Klein Dictionary
+const SENSE_LANGUAGE_MAP = {
+  PBH: "Post-Biblical Hebrew",
+  NH: "New/Modern Hebrew",
+  MH: "Mishnaic Hebrew",
+};
+
+// Strip HTML tags to get plain text
+function stripHtml(html) {
+  if (!html) return "";
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return doc.body.textContent || "";
+}
+
+// Extract Hebrew headwords from Klein refs like "Klein Dictionary, תּוֹרִי 1"
+function extractHeadwordsFromRefs(refs) {
+  if (!Array.isArray(refs)) return [];
+  const seen = new Set();
+  const results = [];
+  for (const ref of refs) {
+    const match = ref.match(/^Klein Dictionary,\s+(.+?)\s*\d*$/);
+    if (match) {
+      const hw = match[1].replace(/\s*[ᴵᴵᴵ]+$/, "").trim();
+      if (!seen.has(hw)) {
+        seen.add(hw);
+        results.push(hw);
+      }
+    }
+  }
+  return results;
+}
+
+// Extract derivative words from Klein derivatives HTML string
+function extractDerivatives(derivativesHtml) {
+  if (!derivativesHtml) return [];
+  const doc = new DOMParser().parseFromString(derivativesHtml, "text/html");
+  const links = doc.querySelectorAll("a[data-ref]");
+  const results = [];
+  const seen = new Set();
+  links.forEach((link) => {
+    const text = link.textContent.trim();
+    if (text && !seen.has(text)) {
+      seen.add(text);
+      results.push(text);
+    }
+  });
+  return results;
+}
+
+// Try to extract the shoresh (root) from Klein notes
+function extractShoresh(notes) {
+  if (!notes) return null;
+  const doc = new DOMParser().parseFromString(notes, "text/html");
+  // Look for root verb references — patterns like "Hiph. of ירה" or "Qal of כתב"
+  const links = doc.querySelectorAll("a.refLink[data-ref]");
+  for (const link of links) {
+    const ref = link.getAttribute("data-ref") || "";
+    // Klein Dictionary verb entries look like "Klein Dictionary, ירה ᴵ 1"
+    const match = ref.match(/^Klein Dictionary,\s+([א-ת]+)/);
+    if (match) {
+      const root = match[1];
+      // Only return 2-4 letter roots (Hebrew shoresh)
+      if (root.length >= 2 && root.length <= 4) {
+        return root;
+      }
+    }
+  }
+  return null;
+}
+
+// Collect senses into a flat displayable array preserving structure
+function collectSensesForDisplay(senses, depth = 0) {
+  if (!Array.isArray(senses)) return [];
+  const result = [];
+  for (const sense of senses) {
+    if (sense.definition) {
+      result.push({
+        number: sense.number || null,
+        definition: sense.definition,
+        languageCode: sense.language_code || null,
+        depth,
+      });
+    }
+    if (sense.grammar?.verbal_stem) {
+      const stem = sense.grammar.verbal_stem.replace(/^[—\-]\s*/, "");
+      const subSenses = collectSensesForDisplay(sense.senses, depth + 1);
+      result.push({ stem, subSenses, depth });
+    } else if (sense.senses) {
+      result.push(...collectSensesForDisplay(sense.senses, depth + 1));
+    }
+  }
+  return result;
+}
+
+export async function getImportantLexiconInformation(word) {
+  const url = "https://www.sefaria.org/api/words/" + encodeURIComponent(word);
+  const response = await fetch(url);
+  if (!response.ok) return null;
+  const entries = await response.json();
+  if (!Array.isArray(entries) || entries.length === 0) return null;
+
+  const result = {
+    headword: entries[0].headword || word,
+    transliteration: null,
+    pronunciation: null,
+    strongNumber: null,
+    morphology: null,
+    shoresh: null,
+    etymology: null,
+    derivatives: [],
+    relatedEntries: [],
+    languagePeriods: [],
+    definitionsBySource: [],
+    pluralForm: [],
+    prevHeadword: null,
+    nextHeadword: null,
+  };
+
+  const languagePeriods = new Set();
+
+  for (const entry of entries) {
+    const lexicon = entry.parent_lexicon;
+    const lang = entry.parent_lexicon_details?.language;
+    if (lang && LANGUAGE_MAP[lang]) {
+      languagePeriods.add(LANGUAGE_MAP[lang]);
+    }
+
+    if (lexicon === "Klein Dictionary") {
+      // Morphology
+      if (!result.morphology && entry.content?.morphology) {
+        result.morphology = entry.content.morphology;
+      }
+      // Etymology from notes
+      if (!result.etymology && entry.notes) {
+        result.etymology = stripHtml(entry.notes);
+        result.shoresh = extractShoresh(entry.notes);
+      }
+      // Derivatives
+      if (entry.derivatives && result.derivatives.length === 0) {
+        result.derivatives = extractDerivatives(entry.derivatives);
+      }
+      // Related entries from refs
+      if (entry.refs && result.relatedEntries.length === 0) {
+        result.relatedEntries = extractHeadwordsFromRefs(entry.refs);
+      }
+      // Navigation
+      if (!result.prevHeadword && entry.prev_hw) result.prevHeadword = entry.prev_hw;
+      if (!result.nextHeadword && entry.next_hw) result.nextHeadword = entry.next_hw;
+
+      // Definitions
+      if (entry.content?.senses) {
+        result.definitionsBySource.push({
+          source: "Klein Dictionary",
+          language: LANGUAGE_MAP[lang] || "Hebrew",
+          morphology: entry.content.morphology || null,
+          senses: collectSensesForDisplay(entry.content.senses),
+        });
+      }
+    } else if (lexicon === "BDB Augmented Strong") {
+      // Skip proper nouns
+      if (entry.language_code === "x-pn") continue;
+
+      if (!result.transliteration && entry.transliteration) {
+        result.transliteration = entry.transliteration;
+      }
+      if (!result.pronunciation && entry.pronunciation) {
+        result.pronunciation = entry.pronunciation;
+      }
+      if (!result.strongNumber && entry.strong_number) {
+        result.strongNumber = entry.strong_number;
+      }
+
+      if (entry.content?.senses) {
+        result.definitionsBySource.push({
+          source: "BDB Augmented Strong",
+          language: LANGUAGE_MAP[lang] || "Biblical Hebrew",
+          morphology: entry.content.morphology || null,
+          senses: collectSensesForDisplay(entry.content.senses),
+        });
+      }
+    } else if (lexicon === "Jastrow Dictionary") {
+      if (entry.plural_form?.length) {
+        result.pluralForm = entry.plural_form;
+      }
+      if (entry.content?.senses) {
+        result.definitionsBySource.push({
+          source: "Jastrow Dictionary",
+          language: "Talmudic/Rabbinic",
+          morphology: entry.content.morphology || null,
+          senses: collectSensesForDisplay(entry.content.senses),
+        });
+      }
+    } else if (lexicon === "BDB Dictionary") {
+      if (entry.content?.senses) {
+        result.definitionsBySource.push({
+          source: "BDB Dictionary",
+          language: LANGUAGE_MAP[lang] || "Biblical Hebrew",
+          morphology: entry.content?.senses?.[0]?.definition?.match(/^<strong>(.*?)<\/strong>/)?.[1] || null,
+          senses: collectSensesForDisplay(entry.content.senses),
+        });
+      }
+    }
+  }
+
+  result.languagePeriods = [...languagePeriods];
+
+  // Fallback morphology from any entry
+  if (!result.morphology) {
+    for (const entry of entries) {
+      if (entry.content?.morphology) {
+        result.morphology = entry.content.morphology;
+        break;
+      }
+    }
+  }
+
+  return result;
+}

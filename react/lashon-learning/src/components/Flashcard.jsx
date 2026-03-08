@@ -1,27 +1,7 @@
 import React, { useMemo, useState } from "react";
-
-function sanitizeHtml(html) {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  doc.querySelectorAll("script,style,iframe,object,embed,link").forEach((el) => el.remove());
-  doc.querySelectorAll("*").forEach((el) => {
-    for (const attr of [...el.attributes]) {
-      if (attr.name.startsWith("on") || (attr.name === "href" && attr.value.trimStart().startsWith("javascript:"))) {
-        el.removeAttribute(attr.name);
-      }
-    }
-  });
-  return doc.body.innerHTML;
-}
-
-function toSefariaUrl(ref) {
-  const clean = ref.replace(/\s*\(.*\)\s*$/, "").trim();
-  const m = clean.match(/^(.+?)\s+(\d+\w*:\d+)$/);
-  if (!m)
-    return `https://www.sefaria.org/${encodeURIComponent(clean.replace(/\s+/g, "_").replace(/:/g, "."))}?lang=bi`;
-  const book = m[1].replace(/\s+/g, "_");
-  const loc = m[2].replace(/:/g, ".");
-  return `https://www.sefaria.org/${encodeURIComponent(book)}.${encodeURIComponent(loc)}?lang=bi`;
-}
+import { Link } from "react-router-dom";
+import { BookOpen } from "lucide-react";
+import { sanitizeHtml, toSefariaUrl } from "../utils/sefaria";
 
 export default function Flashcard({
   word,
@@ -90,8 +70,18 @@ export default function Flashcard({
             </h2>
           </div>
 
-          <div className="text-center text-xs text-zinc-400 uppercase tracking-widest">
-            Flashcard
+          <div className="flex items-center justify-between">
+            <Link
+              to={`/wordlist/${encodeURIComponent(word)}`}
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white/80 px-2.5 py-1.5 text-xs font-medium text-zinc-500 transition hover:border-primary/40 hover:text-primary hover:bg-primary/5"
+            >
+              <BookOpen size={12} />
+              Explore
+            </Link>
+            <span className="text-xs text-zinc-400 uppercase tracking-widest">
+              Flashcard
+            </span>
           </div>
         </div>
 
