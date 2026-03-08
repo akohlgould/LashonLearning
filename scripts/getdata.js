@@ -44,13 +44,64 @@ function sefariaUrl(path) {
   return PROXY_BASE + path;
 }
 
+const CACHE_KEY = "lashonLearning_wordCache";
+const MAX_CACHE_SIZE = 100;
+
+function getCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return { entries: {}, order: [] };
+    return JSON.parse(raw);
+  } catch {
+    return { entries: {}, order: [] };
+  }
+}
+
+function setCache(cache) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // storage full or unavailable — silently ignore
+  }
+}
+
+function getCachedWord(word) {
+  const cache = getCache();
+  if (!(word in cache.entries)) return null;
+  // Move to end (most recently used)
+  cache.order = cache.order.filter((w) => w !== word);
+  cache.order.push(word);
+  setCache(cache);
+  return cache.entries[word];
+}
+
+function cacheWord(word, data) {
+  const cache = getCache();
+  // Evict oldest entries if at capacity
+  while (cache.order.length >= MAX_CACHE_SIZE) {
+    const oldest = cache.order.shift();
+    delete cache.entries[oldest];
+  }
+  cache.entries[word] = { definition: data.definition, verses: data.verses };
+  cache.order = cache.order.filter((w) => w !== word);
+  cache.order.push(word);
+  setCache(cache);
+}
+
 // function to process a word using all the functions below and return the data to be used in the app
 export async function getData(word) {
+  const cached = getCachedWord(word);
+  if (cached) {
+    return { word, definition: cached.definition, verses: cached.verses };
+  }
+
   const [definition, verses] = await Promise.all([
     getDefinition(word).catch(() => "Definition not available."),
     getVerses(word).catch(() => ({})),
   ]);
-  return { word, definition, verses };
+  const result = { word, definition, verses };
+  cacheWord(word, result);
+  return result;
 }
 
 // Recursively collect all definition strings from a nested senses array
