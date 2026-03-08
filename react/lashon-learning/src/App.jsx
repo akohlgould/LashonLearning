@@ -1,12 +1,11 @@
 import { useState, useCallback, useEffect } from 'react'
 import Header from './components/Header'
 import FlashcardsPage from './pages/FlashcardsPage'
-import WordlistPage from './pages/wordlistPage'
+import WordlistPage from './pages/WordlistPage'
 import MatchingPage from './pages/MatchingPage'
 import ExplorePage from './pages/ExplorePage'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
-
-const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
+import { EXTENSION_ID } from './constants'
 
 function App() {
   const [words, setWords] = useState([]);

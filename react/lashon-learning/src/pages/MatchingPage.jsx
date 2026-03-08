@@ -1,14 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { getData } from "../../../../scripts/getdata";
-
-function shuffleArray(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+import { getData } from "../services/sefariaApi";
+import { shuffleArray, formatTime } from "../utils/helpers";
 
 export default function MatchingPage({ words, loading, emptyReason }) {
   const [cards, setCards] = useState([]); // loaded {word, definition} pairs
@@ -18,6 +10,8 @@ export default function MatchingPage({ words, loading, emptyReason }) {
   const [wrong, setWrong] = useState(new Set()); // briefly flash wrong tiles
   const [gameState, setGameState] = useState("loading"); // loading | ready | playing | done
   const [timer, setTimer] = useState(0);
+  const [penaltyFlash, setPenaltyFlash] = useState(false);
+  const penaltyRef = useRef(0);
   const [bestTime, setBestTime] = useState(() => {
     const stored = localStorage.getItem("lashonLearning_matchBestTime");
     return stored ? parseFloat(stored) : null;
@@ -34,6 +28,7 @@ export default function MatchingPage({ words, loading, emptyReason }) {
     setSelected(null);
     setWrong(new Set());
     setTimer(0);
+    penaltyRef.current = 0;
     if (timerRef.current) clearInterval(timerRef.current);
 
     const count = Math.min(6, words.length);
@@ -95,7 +90,7 @@ export default function MatchingPage({ words, loading, emptyReason }) {
     const start = Date.now();
     setTimer(0);
     timerRef.current = setInterval(() => {
-      setTimer((Date.now() - start) / 1000);
+      setTimer((Date.now() - start) / 1000 + penaltyRef.current);
     }, 100);
   }, []);
 
@@ -110,7 +105,11 @@ export default function MatchingPage({ words, loading, emptyReason }) {
     (tileIndex) => {
       if (gameState === "done") return;
       const tile = tiles[tileIndex];
-      if (matched.has(tile.pairId) && matched.has(tile.pairId + "-" + tile.type)) return;
+      if (
+        matched.has(tile.pairId) &&
+        matched.has(tile.pairId + "-" + tile.type)
+      )
+        return;
       // Check if this specific tile is already matched
       if (matched.has(`${tile.pairId}-${tile.type}`)) return;
 
@@ -155,26 +154,26 @@ export default function MatchingPage({ words, loading, emptyReason }) {
             const finalTime = prev;
             if (!bestTime || finalTime < bestTime) {
               setBestTime(finalTime);
-              localStorage.setItem("lashonLearning_matchBestTime", finalTime.toString());
+              localStorage.setItem(
+                "lashonLearning_matchBestTime",
+                finalTime.toString(),
+              );
             }
             return prev;
           });
         }
       } else {
-        // Wrong match - flash red
+        // Wrong match - flash red and add 1 second penalty
+        penaltyRef.current += 1;
         setWrong(new Set([selected, tileIndex]));
         setSelected(null);
+        setPenaltyFlash(true);
         setTimeout(() => setWrong(new Set()), 400);
+        setTimeout(() => setPenaltyFlash(false), 800);
       }
     },
     [gameState, tiles, selected, matched, startTimer, stopTimer, bestTime],
   );
-
-  const formatTime = (t) => {
-    const s = Math.floor(t);
-    const ms = Math.floor((t % 1) * 10);
-    return `${s}.${ms}s`;
-  };
 
   const isLoading = loading || cardsLoading;
 
@@ -182,7 +181,9 @@ export default function MatchingPage({ words, loading, emptyReason }) {
     return (
       <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col items-center justify-center px-4 py-8">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-        <p className="mt-3 text-zinc-600 font-medium">Loading matching game...</p>
+        <p className="mt-3 text-zinc-600 font-medium">
+          Loading matching game...
+        </p>
       </div>
     );
   }
@@ -202,7 +203,9 @@ export default function MatchingPage({ words, loading, emptyReason }) {
   if (cards.length < 2 && gameState !== "loading") {
     return (
       <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col items-center justify-center px-4 py-8">
-        <p className="text-zinc-500">Need at least 2 words with definitions to play. Try adding more words.</p>
+        <p className="text-zinc-500">
+          Need at least 2 words with definitions to play. Try adding more words.
+        </p>
         <button
           onClick={loadGame}
           className="mt-4 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90"
@@ -225,8 +228,13 @@ export default function MatchingPage({ words, loading, emptyReason }) {
         </button>
 
         <div className="flex items-center gap-3 text-sm text-zinc-600">
-          <span className="font-mono text-lg font-bold text-zinc-800">
+          <span className="relative font-mono text-lg font-bold text-zinc-800">
             {formatTime(timer)}
+            {penaltyFlash && (
+              <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-bold text-red-500 animate-[fadeUp_0.8s_ease-out_forwards]">
+                +1s
+              </span>
+            )}
           </span>
           {bestTime && (
             <span className="text-xs text-zinc-400">

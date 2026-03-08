@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import Flashcard from "../components/Flashcard";
-import { exportToAnki } from "../../../../scripts/AnkiExport";
-import { getData } from "../../../../scripts/getdata";
+import { exportToAnki } from "../services/ankiExport";
+import { getData } from "../services/sefariaApi";
 
 /**
  * FlashcardsPage component displays a list of flashcards with navigation controls.

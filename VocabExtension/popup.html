@@ -3,12 +3,23 @@
     <head>
         <meta charset="UTF-8" />
         <title>Flashcard Grabber</title>
+        <!-- load same fonts as the main site -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&family=Heebo:wght@100..900&family=Noto+Serif+Hebrew:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+            rel="stylesheet"
+        />
         <style>
             body {
                 width: 260px;
                 padding: 15px;
-                font-family: sans-serif;
+                /* match root font stack from website */
+                font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
                 text-align: center;
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             }
 
             h3 {
@@ -83,6 +94,8 @@
                 color: #1a1a1a;
                 letter-spacing: 0.01em;
                 transition: background-color 0.15s ease;
+                border-radius: 4px;
+                margin: 2px 4px; /* give a bit of breathing room for the rounding */
             }
 
             #word-list li:hover {
@@ -98,7 +111,8 @@
                 font-size: 13px;
                 text-align: center;
                 direction: ltr;
-                font-family: sans-serif;
+                /* match the website's English sans-serif stack */
+                font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
                 padding: 14px 10px;
             }
 
@@ -107,10 +121,11 @@
                 padding: 10px;
                 color: white;
                 border: none;
-                border-radius: 4px;
+                border-radius: 8px;
                 cursor: pointer;
                 margin-bottom: 8px;
                 font-size: 14px;
+                transition: background-color 0.2s ease;
             }
 
             #download {
@@ -201,6 +216,9 @@
     </head>
     <body>
         <h3>Flashcard Data</h3>
+        <button id="open-app" class="btn" style="background-color: #18345d; margin-bottom: 8px;">
+            Open App
+        </button>
         <div id="word-count">Loading...</div>
         <ul id="word-list"></ul>
 

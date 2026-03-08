@@ -61,7 +61,7 @@ export default function Flashcard({
             <span className="text-xs text-zinc-400">Click to reveal</span>
           </div>
 
-          <div className="flex flex-1 items-center justify-center px-4">
+          <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto px-4">
             <h2
               className={`text-center font-bold text-zinc-900 ${isWordFirst ? "text-3xl sm:text-5xl" : "text-xl sm:text-2xl"}`}
               dir={isWordFirst ? "rtl" : "ltr"}
@@ -98,7 +98,7 @@ export default function Flashcard({
             <span className="text-xs text-zinc-400">Click to go back</span>
           </div>
 
-          <div className="mt-4 flex flex-1 flex-col overflow-hidden">
+          <div className="mt-4 flex min-h-0 flex-1 flex-col overflow-y-auto">
             <div className="flex items-center justify-center py-4">
               <h2
                 className={`text-center font-semibold text-zinc-900 ${!isWordFirst ? "text-3xl sm:text-5xl" : "text-xl sm:text-2xl"}`}
@@ -110,7 +110,7 @@ export default function Flashcard({
 
             {/* Sources Section */}
             {hasSources && (
-              <div className="mt-6 flex min-h-0 flex-1 flex-col">
+              <div className="mt-6 flex max-h-40 flex-col">
                 <div className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
                   Sources
                 </div>

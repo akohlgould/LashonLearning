@@ -65,6 +65,10 @@ function setCache(cache) {
   }
 }
 
+export function clearCache() {
+  localStorage.removeItem(CACHE_KEY);
+}
+
 function getCachedWord(word) {
   const cache = getCache();
   if (!(word in cache.entries)) return null;
@@ -86,6 +90,45 @@ function cacheWord(word, data) {
   cache.order = cache.order.filter((w) => w !== word);
   cache.order.push(word);
   setCache(cache);
+}
+
+function bustWordCache(word) {
+  const cache = getCache();
+  if (word in cache.entries) {
+    delete cache.entries[word];
+    cache.order = cache.order.filter((w) => w !== word);
+    setCache(cache);
+  }
+}
+
+// ── Selected-definition overrides ────────────────────────────────────────────
+const SELECTED_DEFS_KEY = "lashonLearning_selectedDefs";
+
+function getSelectedDefsStore() {
+  try {
+    const raw = localStorage.getItem(SELECTED_DEFS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function getSelectedDefinition(word) {
+  return getSelectedDefsStore()[word] ?? null;
+}
+
+export function setSelectedDefinition(word, definition) {
+  const store = getSelectedDefsStore();
+  store[word] = definition;
+  localStorage.setItem(SELECTED_DEFS_KEY, JSON.stringify(store));
+  bustWordCache(word);
+}
+
+export function clearSelectedDefinition(word) {
+  const store = getSelectedDefsStore();
+  delete store[word];
+  localStorage.setItem(SELECTED_DEFS_KEY, JSON.stringify(store));
+  bustWordCache(word);
 }
 
 // --- Custom definition overrides (user-selected from Explore page) ---
@@ -127,29 +170,41 @@ export function clearCustomDefinition(word) {
 
 // function to process a word using all the functions below and return the data to be used in the app
 export async function getData(word) {
+  // User-selected override always wins, bypassing the cache
+  const selectedDef = getSelectedDefinition(word);
+
   const customDef = getCustomDefinition(word);
 
   const cached = getCachedWord(word);
   if (cached) {
-    return { word, definition: customDef || cached.definition, verses: cached.verses };
+    return { word, definition: selectedDef ?? customDef || cached.definition, verses: cached.verses };
   }
 
   const [definition, verses] = await Promise.all([
     getDefinition(word).catch(() => "Definition not available."),
     getVerses(word).catch(() => ({})),
   ]);
-  const result = { word, definition, verses };
+  const result = { word, definition: selectedDef ?? definition, verses };
   cacheWord(word, result);
   return { word, definition: customDef || definition, verses };
 }
 
 // Recursively collect all definition strings from a nested senses array
-function collectDefinitions(senses, parts = []) {
+function collectDefinitions(senses, parts = [], badDict = false) {
   if (!Array.isArray(senses)) return parts;
   for (const sense of senses) {
     if (sense.definition) {
+      const italicMatch = sense.definition.match(
+        "<(?:i|em)\\b[^>]*>(.*?)<\\/(?:i|em)>",
+      );
+      const italic = italicMatch ? italicMatch[1] : sense.definition;
+      console.log(italicMatch);
       const prefix = sense.number ? `${sense.number}. ` : "";
-      parts.push(prefix + sense.definition);
+      if (badDict) {
+        parts.push(prefix + stripHtml(italic));
+      } else {
+        parts.push(prefix + stripHtml(sense.definition));
+      }
     }
     if (sense.grammar?.verbal_stem) {
       // label the binyan group
@@ -170,27 +225,35 @@ function collectDefinitions(senses, parts = []) {
 async function getDefinition(word) {
   try {
     const url = "https://www.sefaria.org/api/words/" + encodeURIComponent(word);
-    const data = await fetch(url);
-    if (!data.ok) return "Definition not available.";
-    const jsonData = await data.json();
+    const response = await fetch(url);
+    if (!response.ok) return "Definition not available.";
+    const jsonData = await response.json();
 
-    const topSenses = jsonData?.[0]?.content?.senses;
+    const isInGoodDictionary = (entry) => {
+      let result = false;
+      if (entry.parent_lexicon === "Klein Dictionary") result = true;
+      if (entry.parent_lexicon === "BDB Augmented Strong") result = true;
+      return result;
+    };
+
+    const filtered = jsonData.filter(isInGoodDictionary);
+
+    const data = filtered.length === 0 ? jsonData : filtered;
+
+    console.log(data, filtered.length === 0);
+
+    const topSenses = data?.[0]?.content?.senses;
     if (!topSenses) return "Definition not available.";
-    
-    
-    let parts = collectDefinitions(topSenses);
+
+    let parts = collectDefinitions(topSenses, [], filtered.length === 0);
 
     parts = parts.filter((part) => {
       return !partsofspeech.has(part.trim().toLowerCase().replace(".", ""));
     });
 
-    console.log(parts);
-
     if (parts.length === 0) return "Definition not available.";
 
-    console.log(parts);
     return parts[0];
-    
   } catch (err) {
     console.error("Definition Error:", err);
     return "No definition found.";
@@ -239,7 +302,7 @@ export async function getVerses(wordtoSearch) {
       verses[hits[i]._id] =
         hits[i].highlight?.naive_lemmatizer?.join(" ") ?? "";
     }
-    return await verses;
+    return verses;
   } catch (err) {
     console.error("Search Error:", err);
     return [];
@@ -400,8 +463,10 @@ export async function getImportantLexiconInformation(word) {
         result.relatedEntries = extractHeadwordsFromRefs(entry.refs);
       }
       // Navigation
-      if (!result.prevHeadword && entry.prev_hw) result.prevHeadword = entry.prev_hw;
-      if (!result.nextHeadword && entry.next_hw) result.nextHeadword = entry.next_hw;
+      if (!result.prevHeadword && entry.prev_hw)
+        result.prevHeadword = entry.prev_hw;
+      if (!result.nextHeadword && entry.next_hw)
+        result.nextHeadword = entry.next_hw;
 
       // Definitions
       if (entry.content?.senses) {
@@ -451,7 +516,10 @@ export async function getImportantLexiconInformation(word) {
         result.definitionsBySource.push({
           source: "BDB Dictionary",
           language: LANGUAGE_MAP[lang] || "Biblical Hebrew",
-          morphology: entry.content?.senses?.[0]?.definition?.match(/^<strong>(.*?)<\/strong>/)?.[1] || null,
+          morphology:
+            entry.content?.senses?.[0]?.definition?.match(
+              /^<strong>(.*?)<\/strong>/,
+            )?.[1] || null,
           senses: collectSensesForDisplay(entry.content.senses),
         });
       }
