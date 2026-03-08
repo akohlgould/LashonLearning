@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Trash2, RefreshCw, Plus, Share2, Download, X, Check, BookOpen } from "lucide-react";
 import { useSearchParams, Link } from "react-router-dom";
 import { encodeWordList, decodeWordList } from "../utils/helpers";
 import { EXTENSION_ID } from "../constants";
+import { importAnkiFile } from "../services/ankiImport";  // new import for TSV parsing
 
 export default function WordlistPage({
   words,
@@ -13,7 +14,9 @@ export default function WordlistPage({
   const [newWord, setNewWord] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const [importWords, setImportWords] = useState(null);
+  const [ankiImportWords, setAnkiImportWords] = useState(null); // words loaded from a file
   const [copied, setCopied] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Detect shared word list in URL
   useEffect(() => {
@@ -31,24 +34,77 @@ export default function WordlistPage({
   }, [searchParams]);
 
   const handleImport = (mode) => {
-    if (!importWords) return;
+    // choose source (URL or file)
+    const list = ankiImportWords || importWords;
+    if (!list) return;
+    const existing = new Set(words);
     let updatedWords;
-    if (mode === "replace") {
-      updatedWords = importWords;
+
+    if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
+      // tell extension to merge or replace its storage
+      chrome.runtime.sendMessage(
+        EXTENSION_ID,
+        { action: "importWords", words: list, mode },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error("importWords failed:", chrome.runtime.lastError.message);
+          }
+          if (response && response.success && Array.isArray(response.data)) {
+            updatedWords = response.data.map((item) => item.word);
+          } else {
+            // fallback to local calculation if extension didn't cooperate
+            if (mode === "replace") {
+              updatedWords = list;
+            } else {
+              updatedWords = [...words, ...list.filter((w) => !existing.has(w))];
+            }
+          }
+          localStorage.setItem("wordList", JSON.stringify(updatedWords));
+          updateWords(updatedWords);
+
+          // clear import states when done
+          setImportWords(null);
+          setAnkiImportWords(null);
+          setSearchParams({}, { replace: true });
+        },
+      );
     } else {
-      // merge — add only new words
-      const existing = new Set(words);
-      updatedWords = [...words, ...importWords.filter((w) => !existing.has(w))];
+      // no extension available, just update localStorage
+      if (mode === "replace") {
+        updatedWords = list;
+      } else {
+        updatedWords = [...words, ...list.filter((w) => !existing.has(w))];
+      }
+      localStorage.setItem("wordList", JSON.stringify(updatedWords));
+      updateWords(updatedWords);
+
+      // clear import states immediately
+      setImportWords(null);
+      setAnkiImportWords(null);
+      setSearchParams({}, { replace: true });
     }
-    localStorage.setItem("wordList", JSON.stringify(updatedWords));
-    updateWords(updatedWords);
-    setImportWords(null);
-    setSearchParams({}, { replace: true });
   };
 
   const dismissImport = () => {
     setImportWords(null);
+    setAnkiImportWords(null);
     setSearchParams({}, { replace: true });
+  };
+
+  const handleFileInput = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    try {
+      const wordsFromFile = await importAnkiFile(file);
+      if (wordsFromFile.length > 0) {
+        setAnkiImportWords(wordsFromFile);
+      }
+    } catch (err) {
+      console.error("Failed to parse Anki file:", err);
+      alert("Could not read Anki export. Make sure it is a valid TSV.");
+    }
+    // reset input so same file can be re-selected later if desired
+    e.target.value = null;
   };
 
   const shareList = async () => {
@@ -133,17 +189,26 @@ export default function WordlistPage({
 
   return (
     <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col px-4 py-8 sm:px-6">
-      {/* Import Banner */}
-      {importWords && (
+      {/* Import Banner (shared URL or Anki file) */}
+      {(importWords || ankiImportWords) && (
         <div className="mb-6 rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
               <p className="font-medium text-sky-900">
-                Shared word list ({importWords.length} word{importWords.length !== 1 ? "s" : ""})
+                {ankiImportWords
+                  ? `Words imported from Anki (${ankiImportWords.length} word${ankiImportWords.length !== 1 ? "s" : ""})`
+                  : `Shared word list (${importWords.length} word${importWords.length !== 1 ? "s" : ""})`}
               </p>
               <p className="mt-1 text-sm text-sky-700" dir="rtl">
-                {importWords.slice(0, 5).join("  ·  ")}
-                {importWords.length > 5 && ` … +${importWords.length - 5} more`}
+                {(ankiImportWords ? ankiImportWords : importWords)
+                  .slice(0, 5)
+                  .join("  ·  ")}
+                {(ankiImportWords
+                  ? ankiImportWords
+                  : importWords).length > 5 &&
+                  ` … +${(ankiImportWords
+                    ? ankiImportWords
+                    : importWords).length - 5} more`}
               </p>
             </div>
             <button
@@ -180,15 +245,32 @@ export default function WordlistPage({
             {words.length} word{words.length !== 1 ? "s" : ""} to study
           </p>
         </div>
-        {words.length > 0 && (
+        <div className="flex gap-2">
+          {words.length > 0 && (
+            <button
+              onClick={shareList}
+              className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 active:scale-95"
+            >
+              {copied ? <Check size={16} className="text-green-600" /> : <Share2 size={16} />}
+              {copied ? "Link copied!" : "Share List"}
+            </button>
+          )}
+          {/* import from anki file */}
           <button
-            onClick={shareList}
+            onClick={() => fileInputRef.current?.click()}
             className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 active:scale-95"
           >
-            {copied ? <Check size={16} className="text-green-600" /> : <Share2 size={16} />}
-            {copied ? "Link copied!" : "Share List"}
+            <BookOpen size={16} />
+            Import Anki
           </button>
-        )}
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".tsv,text/tab-separated-values"
+          style={{ display: "none" }}
+          onChange={handleFileInput}
+        />
       </div>
 
       {/* Add Word Section */}
