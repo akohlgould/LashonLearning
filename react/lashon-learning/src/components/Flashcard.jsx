@@ -113,20 +113,20 @@ export default function Flashcard({
                         ) : (
                             // Handle Sefaria Object { "Ref": "Hebrew Text" }
                             Object.entries(sources).map(([ref, text], index) => (
-                                <div key={index} className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm">
-                                  <a
+                                <a
+                                    key={index}
                                     href={toSefariaUrl(ref)}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
-                                    className="block text-[10px] font-bold text-primary uppercase mb-1 hover:underline"
-                                    dir="ltr"
-                                  >
+                                    className="block rounded-lg border border-zinc-200 bg-white p-3 shadow-sm hover:border-primary/40 hover:bg-primary/5 transition cursor-pointer"
+                                >
+                                  <div className="text-[10px] font-bold text-primary uppercase mb-1" dir="ltr">
                                     {String(ref)}
-                                  </a>
+                                  </div>
                                   <div className="text-base text-zinc-800 leading-relaxed font-serif" dir="rtl"
                                        dangerouslySetInnerHTML={{ __html: String(text) }} />
-                                </div>
+                                </a>
                             ))
                         )}
                       </div>
