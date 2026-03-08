@@ -7,9 +7,9 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
-// Strip nekudot (vowel points) and taamim (cantillation marks) from Hebrew text
+// Strip taamim (cantillation marks) from Hebrew text, keeping nekudot
 function cleanHebrew(text) {
-  return text.replace(/[\u0591-\u05BD\u05BF-\u05C7]/g, "");
+  return text.replace(/[\u0591-\u05AF]/g, "");
 }
 
 // Listen for the click
