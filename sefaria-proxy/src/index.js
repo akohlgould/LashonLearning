@@ -33,23 +33,30 @@ export default {
 
     const sefariaUrl = "https://www.sefaria.org" + targetPath;
 
-    const sefariaResponse = await fetch(sefariaUrl, {
-      method: request.method,
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      body: request.method === "POST" ? request.body : undefined,
-    });
+    try {
+      const sefariaResponse = await fetch(sefariaUrl, {
+        method: request.method,
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: request.method === "POST" ? request.body : undefined,
+      });
 
-    const responseBody = await sefariaResponse.text();
+      const responseBody = await sefariaResponse.text();
 
-    return new Response(responseBody, {
-      status: sefariaResponse.status,
-      headers: {
-        ...headers,
-        "Content-Type": sefariaResponse.headers.get("Content-Type") || "application/json",
-      },
-    });
+      return new Response(responseBody, {
+        status: sefariaResponse.status,
+        headers: {
+          ...headers,
+          "Content-Type": sefariaResponse.headers.get("Content-Type") || "application/json",
+        },
+      });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: "Upstream request failed" }), {
+        status: 502,
+        headers: { ...headers, "Content-Type": "application/json" },
+      });
+    }
   },
 };

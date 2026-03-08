@@ -20,6 +20,10 @@ chrome.contextMenus.onClicked.addListener((info) => {
     const word = cleanHebrew(info.selectionText.trim());
 
     chrome.storage.local.get({ wordList: [] }, (data) => {
+      if (chrome.runtime.lastError) {
+        console.error("Storage get error:", chrome.runtime.lastError.message);
+        return;
+      }
       // Check for duplicates
       if (data.wordList.some((item) => item.word === word)) return;
 
@@ -27,7 +31,11 @@ chrome.contextMenus.onClicked.addListener((info) => {
         ...data.wordList,
         { word: word, date: new Date().toISOString() },
       ];
-      chrome.storage.local.set({ wordList: updatedList });
+      chrome.storage.local.set({ wordList: updatedList }, () => {
+        if (chrome.runtime.lastError) {
+          console.error("Storage set error:", chrome.runtime.lastError.message);
+        }
+      });
     });
   }
 });

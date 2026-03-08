@@ -1,5 +1,18 @@
 import React, { useMemo, useState } from "react";
 
+function sanitizeHtml(html) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  doc.querySelectorAll("script,style,iframe,object,embed,link").forEach((el) => el.remove());
+  doc.querySelectorAll("*").forEach((el) => {
+    for (const attr of [...el.attributes]) {
+      if (attr.name.startsWith("on") || (attr.name === "href" && attr.value.trimStart().startsWith("javascript:"))) {
+        el.removeAttribute(attr.name);
+      }
+    }
+  });
+  return doc.body.innerHTML;
+}
+
 function toSefariaUrl(ref) {
   const clean = ref.replace(/\s*\(.*\)\s*$/, "").trim();
   const m = clean.match(/^(.+?)\s+(\d+\w*:\d+)$/);
@@ -149,7 +162,7 @@ export default function Flashcard({
                             <div
                               className="text-base text-zinc-800 leading-relaxed font-serif"
                               dir="rtl"
-                              dangerouslySetInnerHTML={{ __html: String(text) }}
+                              dangerouslySetInnerHTML={{ __html: sanitizeHtml(String(text)) }}
                             />
                           </a>
                         ))}
