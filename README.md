@@ -1,1 +1,1 @@
-fortnite
+fortnite sucks
