@@ -51,10 +51,13 @@ export default function FlashcardsPage({
     loadedRef.current = new Set();
     setCurrentIndex(0);
     setCardKey((prev) => prev + 1);
+  }, [words]);
+
+  useEffect(() => {
     if (words.length > 0) {
       loadCards(0, 1);
     }
-  }, [words, loadCards]);
+  }, [words.length, loadCards]);
 
   const handleRefresh = async () => {
     setCurrentIndex(0);
@@ -109,7 +112,7 @@ export default function FlashcardsPage({
   const loadedCards = Object.values(flashcards);
 
   return (
-    <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col px-4 py-8 sm:px-6">
+    <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 py-8 sm:px-6">
       
       {/* Settings Bar */}
       <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
@@ -157,7 +160,7 @@ export default function FlashcardsPage({
       </div>
 
       {/* Main Flashcard Display Area */}
-      <div className="flex items-center justify-center gap-5 mt-12">
+      <div className="flex items-center justify-center gap-2 sm:gap-5 mt-12">
         {cardLoading ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
@@ -171,10 +174,10 @@ export default function FlashcardsPage({
             <button
               type="button"
               onClick={goBack}
-              className="inline-flex h-16 w-16 hover:scale-[1.05] transition-all flex-shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
+              className="inline-flex h-12 w-12 sm:h-16 sm:w-16 hover:scale-[1.05] shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
               aria-label="Previous flashcard"
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
             </button>
 
             <Flashcard
@@ -189,10 +192,10 @@ export default function FlashcardsPage({
             <button
               type="button"
               onClick={goNext}
-              className="inline-flex h-16 w-16 hover:scale-[1.05] transition-all flex-shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
+              className="inline-flex h-12 w-12 sm:h-16 sm:w-16 hover:scale-[1.05] shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
               aria-label="Next flashcard"
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={20} className="sm:w-6 sm:h-6" />
             </button>
           </>
         ) : (

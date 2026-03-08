@@ -67,3 +67,35 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background: #a0a0a0;
 }
+
+/* Mobile-friendly touch targets and responsive styles */
+@media (max-width: 768px) {
+  :root {
+    --serif-h1-font-size: 36px;
+    --serif-h2-font-size: 24px;
+    --serif-h3-font-size: 20px;
+    --serif-body-font-size: 16px;
+    --sans-serif-h1-font-size: 32px;
+    --sans-serif-h2-font-size: 24px;
+    --sans-serif-h3-font-size: 18px;
+    --sans-serif-body-font-size: 15px;
+  }
+
+  /* Ensure touch targets are at least 44x44px */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent text selection on touch interactions */
+  .flashcard, .flashcard-content {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Improve spacing on mobile */
+  body {
+    -webkit-text-size-adjust: 100%;
+  }
+}
