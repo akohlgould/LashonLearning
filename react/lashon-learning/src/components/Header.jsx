@@ -17,19 +17,7 @@ const Header = () => {
         <Link to="/wordlist"><span className="">wordlist</span></Link>
       </div>
 
-      <div className="ml-auto text-[#666666] relative font-semibold flex gap-5 place-items-center">
-        <FaSearch className="absolute top-2 left-2" />
-        <div className="rounded-full bg-[#EDEDED] w-70 pl-7 py-1 justify-items-start font-english-serif">
-          Search
-        </div>
-        <div className="bg-primary text-white text-sm py-1 px-4 rounded-md">
-          Sign Up
-        </div>
-        <FaQuestionCircle />
-        <FaGlobe />
-        <CgMenuGridO />
-        <FaUserCircle />
-      </div>
+      
     </header>
   );
 };
