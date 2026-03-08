@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
-import { getImportantLexiconInformation, getVerses } from "../services/sefariaApi";
+import { ChevronLeft, ChevronRight, BookOpen, Check, X } from "lucide-react";
+import { getImportantLexiconInformation, getVerses, getSelectedDefinition, setSelectedDefinition, clearSelectedDefinition } from "../services/sefariaApi";
 import { sanitizeHtml, toSefariaUrl } from "../utils/sefaria";
 
 export default function ExplorePage() {
@@ -12,6 +12,7 @@ export default function ExplorePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAllVerses, setShowAllVerses] = useState(false);
+  const [selectedDef, setSelectedDef] = useState(() => getSelectedDefinition(decodedWord));
 
   useEffect(() => {
     let cancelled = false;
@@ -20,6 +21,7 @@ export default function ExplorePage() {
     setLexicon(null);
     setVerses(null);
     setShowAllVerses(false);
+    setSelectedDef(getSelectedDefinition(decodedWord));
 
     Promise.all([
       getImportantLexiconInformation(decodedWord),
@@ -41,6 +43,16 @@ export default function ExplorePage() {
     });
 
     return () => { cancelled = true; };
+  }, [decodedWord]);
+
+  const handleSelectDef = useCallback((defString) => {
+    setSelectedDefinition(decodedWord, defString);
+    setSelectedDef(defString);
+  }, [decodedWord]);
+
+  const handleClearDef = useCallback(() => {
+    clearSelectedDefinition(decodedWord);
+    setSelectedDef(null);
   }, [decodedWord]);
 
   if (loading) {
@@ -223,11 +235,34 @@ export default function ExplorePage() {
       {/* Definitions by Source */}
       {lexicon.definitionsBySource.length > 0 && (
         <div className="flex flex-col gap-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
-            Definitions
-          </h2>
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+              Definitions
+            </h2>
+          </div>
+
+          {/* Active definition banner */}
+          {selectedDef && (
+            <div className="flex items-start justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+              <div className="flex items-start gap-2 min-w-0">
+                <Check size={14} className="mt-0.5 shrink-0 text-emerald-600" />
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 mb-0.5">Active definition (used in flashcards)</p>
+                  <p className="text-sm text-emerald-900 break-words">{selectedDef}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleClearDef}
+                className="shrink-0 inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-white px-2.5 py-1 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100 active:scale-95"
+              >
+                <X size={12} />
+                Remove
+              </button>
+            </div>
+          )}
+
           {lexicon.definitionsBySource.map((source, si) => (
-            <SourceCard key={si} source={source} />
+            <SourceCard key={si} source={source} selectedDef={selectedDef} onSelect={handleSelectDef} onClear={handleClearDef} />
           ))}
         </div>
       )}
@@ -274,7 +309,7 @@ export default function ExplorePage() {
   );
 }
 
-function SourceCard({ source }) {
+function SourceCard({ source, selectedDef, onSelect, onClear }) {
   const [expanded, setExpanded] = useState(true);
 
   return (
@@ -302,14 +337,14 @@ function SourceCard({ source }) {
       </button>
       {expanded && (
         <div className="border-t border-zinc-100 px-4 pb-4 pt-3">
-          <SenseList senses={source.senses} />
+          <SenseList senses={source.senses} selectedDef={selectedDef} onSelect={onSelect} onClear={onClear} />
         </div>
       )}
     </div>
   );
 }
 
-function SenseList({ senses }) {
+function SenseList({ senses, selectedDef, onSelect, onClear }) {
   if (!senses || senses.length === 0) {
     return <p className="text-sm text-zinc-400">No definitions available.</p>;
   }
@@ -325,28 +360,58 @@ function SenseList({ senses }) {
               </span>
               {sense.subSenses?.length > 0 && (
                 <div className="ml-4 mt-1">
-                  <SenseList senses={sense.subSenses} />
+                  <SenseList senses={sense.subSenses} selectedDef={selectedDef} onSelect={onSelect} onClear={onClear} />
                 </div>
               )}
             </div>
           );
         }
 
+        // Strip HTML to get the plain-text definition string for storage/comparison
+        const plainDef = sense.definition
+          ? new DOMParser().parseFromString(sense.definition, "text/html").body.textContent || sense.definition
+          : "";
+        const isActive = selectedDef === plainDef;
+
         return (
           <div
             key={i}
-            className="text-sm text-zinc-700 leading-relaxed"
-            style={{ paddingLeft: `${sense.depth * 12}px` }}
+            className={`group flex items-start justify-between gap-3 rounded-lg px-2 py-1.5 transition ${isActive ? "bg-emerald-50 ring-1 ring-emerald-200" : "hover:bg-zinc-50"
+              }`}
+            style={{ marginLeft: `${sense.depth * 12}px` }}
           >
-            {sense.number && (
-              <span className="mr-1.5 font-semibold text-zinc-500">{sense.number}</span>
+            <div className="text-sm text-zinc-700 leading-relaxed flex-1 min-w-0">
+              {sense.number && (
+                <span className="mr-1.5 font-semibold text-zinc-500">{sense.number}</span>
+              )}
+              {sense.languageCode && (
+                <span className="mr-1.5 text-[10px] font-medium uppercase text-sky-500">
+                  [{sense.languageCode}]
+                </span>
+              )}
+              <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(sense.definition) }} />
+            </div>
+
+            {plainDef && (
+              isActive ? (
+                <button
+                  onClick={() => onClear()}
+                  title="Remove as active definition"
+                  className="shrink-0 inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-white px-2 py-0.5 text-[11px] font-medium text-emerald-700 transition hover:bg-red-50 hover:border-red-300 hover:text-red-600 active:scale-95"
+                >
+                  <Check size={11} />
+                  Active
+                </button>
+              ) : (
+                <button
+                  onClick={() => onSelect(plainDef)}
+                  title="Use as active definition"
+                  className="shrink-0 inline-flex items-center gap-1 rounded-md border border-zinc-200 bg-white px-2 py-0.5 text-[11px] font-medium text-zinc-500 opacity-0 group-hover:opacity-100 transition hover:border-primary/40 hover:bg-primary/5 hover:text-primary active:scale-95"
+                >
+                  Use this
+                </button>
+              )
             )}
-            {sense.languageCode && (
-              <span className="mr-1.5 text-[10px] font-medium uppercase text-sky-500">
-                [{sense.languageCode}]
-              </span>
-            )}
-            <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(sense.definition) }} />
           </div>
         );
       })}

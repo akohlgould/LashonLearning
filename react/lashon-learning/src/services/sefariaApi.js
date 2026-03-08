@@ -88,18 +88,60 @@ function cacheWord(word, data) {
   setCache(cache);
 }
 
+function bustWordCache(word) {
+  const cache = getCache();
+  if (word in cache.entries) {
+    delete cache.entries[word];
+    cache.order = cache.order.filter((w) => w !== word);
+    setCache(cache);
+  }
+}
+
+// ── Selected-definition overrides ────────────────────────────────────────────
+const SELECTED_DEFS_KEY = "lashonLearning_selectedDefs";
+
+function getSelectedDefsStore() {
+  try {
+    const raw = localStorage.getItem(SELECTED_DEFS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function getSelectedDefinition(word) {
+  return getSelectedDefsStore()[word] ?? null;
+}
+
+export function setSelectedDefinition(word, definition) {
+  const store = getSelectedDefsStore();
+  store[word] = definition;
+  localStorage.setItem(SELECTED_DEFS_KEY, JSON.stringify(store));
+  bustWordCache(word);
+}
+
+export function clearSelectedDefinition(word) {
+  const store = getSelectedDefsStore();
+  delete store[word];
+  localStorage.setItem(SELECTED_DEFS_KEY, JSON.stringify(store));
+  bustWordCache(word);
+}
+
 // function to process a word using all the functions below and return the data to be used in the app
 export async function getData(word) {
+  // User-selected override always wins, bypassing the cache
+  const selectedDef = getSelectedDefinition(word);
+
   const cached = getCachedWord(word);
   if (cached) {
-    return { word, definition: cached.definition, verses: cached.verses };
+    return { word, definition: selectedDef ?? cached.definition, verses: cached.verses };
   }
 
   const [definition, verses] = await Promise.all([
     getDefinition(word).catch(() => "Definition not available."),
     getVerses(word).catch(() => ({})),
   ]);
-  const result = { word, definition, verses };
+  const result = { word, definition: selectedDef ?? definition, verses };
   cacheWord(word, result);
   return result;
 }
