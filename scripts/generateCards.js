@@ -1,17 +1,17 @@
-import { getData } from './getdata.js';
+import { getData } from "./getdata.js";
 
 export async function generateCards(words) {
-    let wordList = words;
-    
-    if (!Array.isArray(wordList) || wordList.length === 0) {
-        wordList = [];
-    }
+  let wordList = words;
 
-    const cards = [];
+  if (!Array.isArray(wordList) || wordList.length === 0) {
+    wordList = [];
+  }
 
-    for (const word of wordList) {
-        cards.push(await getData(word));
-    }
-    
-    return cards;
+  const cards = [];
+
+  for (const word of wordList) {
+    cards.push(await getData(word));
+  }
+
+  return cards;
 }
