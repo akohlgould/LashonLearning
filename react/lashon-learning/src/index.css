@@ -1,4 +1,4 @@
-
+@import "tailwindcss";
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -6,8 +6,7 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: rgba(255, 255, 255, 0.87);;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -32,10 +31,8 @@
   --sans-serif-h3-font-size: 22px;
   --sans-serif-body-font-size: 16px;
   --sans-serif-small-font-size: 14px;
-}
-
-h1 {
-  font-family: var(--font-english-serif);
+  background-color: #fbfbfa;
+  color: black;
 }
 
 @theme {

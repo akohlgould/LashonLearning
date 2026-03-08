@@ -1,10 +1,16 @@
 import React from 'react';
+import TextHeader from './TextHeader';
+import Sidebar from './Sidebar';
+import Verse from './Verse'
 
 export default function MainContent() {
   return (
     <div>
-      <h1>Main Content</h1>
-      <p>Welcome to the main content area.</p>
+      <Sidebar />
+      <TextHeader />
+        <div>
+            <Verse />
+        </div>
     </div>
   );
 }
