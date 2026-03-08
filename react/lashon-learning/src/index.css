@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --theme-primary: #18345d;
+  --theme-background: #fbfbfa;
+  --theme-select: #0056b3;
+  --theme-text: black;
+  --english-sans-serif-font-family: "Roboto", "Helvetica Neue", "Helvetica", sans-serif;
+  --hebrew-sans-serif-font-family: "Heebo";
+  --english-serif-font-family: "Cardo";
+  --hebrew-serif-font-family: "Noto Serif Hebrew";
+  --serif-h1-font-size: 48px;
+  --serif-h2-font-size: 30px;
+  --serif-h3-font-size: 24px;
+  --serif-body-font-size: 18px;
+  --serif-small-font-size: 14px;
+  --sans-serif-h1-font-size: 40px;
+  --sans-serif-h2-font-size: 30px;
+  --sans-serif-h3-font-size: 22px;
+  --sans-serif-body-font-size: 16px;
+  --sans-serif-small-font-size: 14px;
+  background-color: #fbfbfa;
+  color: black;
+}
+
+button {
+  cursor: pointer;
+}
+
+@theme {
+  --color-primary: var(--theme-primary);
+  --color-background: var(--theme-background);
+  --color-select: var(--theme-select);
+  --color-text: var(--theme-text);
+
+  --font-english-sans-serif: var(--english-sans-serif-font-family);
+  --font-hebrew-sans-serif: var(--hebrew-sans-serif-font-family);
+  --font-english-serif: var(--english-serif-font-family);
+  --font-hebrew-serif: var(--hebrew-serif-font-family);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c4c4c4;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
