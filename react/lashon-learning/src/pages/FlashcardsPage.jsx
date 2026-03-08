@@ -71,6 +71,7 @@ export default function FlashcardsPage({
   };
 
   const totalCards = words.length;
+  const [exporting, setExporting] = useState(false);
 
   // ensure index is within bounds if cards change
   const safeIndex = totalCards > 0 ? Math.min(currentIndex, totalCards - 1) : 0;
@@ -166,7 +167,7 @@ export default function FlashcardsPage({
             className="ml-auto inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
           >
             <Download size={16} />
-            Export Anki
+            {exporting ? "Exporting…" : "Export Anki"}
           </button>
         </div>
       </div>

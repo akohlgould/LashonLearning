@@ -1,5 +1,12 @@
 import { getData } from "./getdata.js";
 
+// internal helper: choose a random element
+function randomInArray(array) {
+  const index = Math.floor(Math.random() * array.length);
+  return array[index];
+}
+
+// create TSV string from the shape returned by getData
 async function convertToTSV(data) {
   const cards = data.cards;
   let tsv = "";
@@ -14,9 +21,9 @@ async function convertToTSV(data) {
 }
 
 export async function exportToAnki(data) {
-  try {
-    const tsv = await convertToTSV(data);
-    const blob = new Blob([tsv], { type: "text/tab-separated-values" });
+  console.log(data);
+  const tsv = await convertToTSV(data);
+  const blob = new Blob([tsv], { type: "text/tab-separated-values" });
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -31,6 +38,6 @@ export async function exportToAnki(data) {
 }
 
 function randomInArray(array) {
-  const index = Math.floor(Math.random() * array.length);
+  const index = Math.floor(Math.random() * (array.length - 1));
   return array[index];
 }

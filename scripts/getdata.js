@@ -137,7 +137,8 @@ async function getDefinition(word) {
 
     const topSenses = jsonData?.[0]?.content?.senses;
     if (!topSenses) return "Definition not available.";
-
+    
+    
     let parts = collectDefinitions(topSenses);
 
     parts = parts.filter((part) => {
@@ -150,6 +151,7 @@ async function getDefinition(word) {
 
     console.log(parts);
     return parts[0];
+    
   } catch (err) {
     console.error("Definition Error:", err);
     return "No definition found.";
