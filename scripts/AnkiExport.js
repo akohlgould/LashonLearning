@@ -20,11 +20,35 @@ async function convertToTSV(data) {
   return tsv;
 }
 
-export async function exportToAnki(data) {
-  console.log(data);
-  const tsv = await convertToTSV(data);
-  const blob = new Blob([tsv], { type: "text/tab-separated-values" });
+// generate card data for an array of words via getData (parallelized)
+export async function generateCardData(words) {
+  if (!Array.isArray(words)) {
+    throw new Error("generateCardData expects an array of words");
+  }
+  const cards = await Promise.all(words.map((w) => getData(w)));
+  return { cards };
+}
+
+/**
+ * Main export function. Accepts either:
+ *   - an object with a `cards` array (existing data), or
+ *   - an array of words (in which case definitions/verses are fetched).
+ */
+export async function exportToAnki(wordsOrData) {
   try {
+    let data;
+    if (Array.isArray(wordsOrData)) {
+      data = await generateCardData(wordsOrData);
+    } else if (wordsOrData && Array.isArray(wordsOrData.cards)) {
+      data = wordsOrData;
+    } else {
+      throw new Error("exportToAnki requires an array of words or a data object");
+    }
+
+    console.log(data);
+    const tsv = await convertToTSV(data);
+    const blob = new Blob([tsv], { type: "text/tab-separated-values" });
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
