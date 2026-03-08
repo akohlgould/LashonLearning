@@ -50,3 +50,20 @@ button {
   --font-english-serif: var(--english-serif-font-family);
   --font-hebrew-serif: var(--hebrew-serif-font-family);
 }
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c4c4c4;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
