@@ -1,17 +1,23 @@
 // function to process a word using all the functions below and return the data to be used in the app
 export async function getData(word) {
+        
+        return { word: word, definition: getDefinition(word), verses: await getVerses(word) };
+}
+
+// function to get the default translation of a word
+async function getDefinition(word) {
+        try {
         const url = "/api/words/" + word;
         // get the data from the url
         const data = await fetch(url);
         const jsonData = await data.json();
-        return { word: word, definition: getDefinition(jsonData), verses: await getVerses(word) };
-}
-
-// function to get the default translation of a word
-function getDefinition(word) {
-  // get the definition of the word
-  const definition = word[0].content.senses[0].definition;
-  return definition;
+        // get the definition of the word
+        const definition = jsonData[0].content.senses[0].definition;
+        return definition;}
+        catch (err) {     
+                console.error("Definition Error:", err);
+                return "No definition found.";
+        }
 }
 
 // function to get 
@@ -23,7 +29,7 @@ async function getVerses(wordtoSearch){
                 "type": "text",
                 "field": "naive_lemmatizer",
                 "size": 100,
-                "slop": 100,
+                "slop": 10,
                 "sort_method": "score",
                 "sort_fields": ["pagesheetrank"]
         };
