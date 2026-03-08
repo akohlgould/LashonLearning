@@ -15,10 +15,8 @@ function randomInArray(array) {
   return array[Math.floor(Math.random() * (array.length - 1))];
 }
 
-async function something() {
+async function main() {
   const entry = await getData("תורה");
   const data = { cards: [entry] };
   console.log(exportToAnki(data));
 }
-
-// something();
