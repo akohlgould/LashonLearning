@@ -21,8 +21,7 @@ export default function FlashcardsPage() {
           async (response) => {
             if (chrome.runtime.lastError) {
               console.error("Sync failed:", chrome.runtime.lastError.message);
-              const cards = await generateCards(); // Load local defaults
-              setFlashcards(cards);
+              setFlashcards([]);
             } else if (response?.success) {
               // Pass the extension data to your card generator
               const cards = await generateCards(response.data);
@@ -32,7 +31,7 @@ export default function FlashcardsPage() {
           }
       );
     } else {
-      const cards = await generateCards();
+      const cards = await generateCards(['אמר', 'דבר', 'עשה']); // Fallback to hardcoded words
       setFlashcards(cards);
       setLoading(false);
     }
