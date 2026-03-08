@@ -90,5 +90,10 @@ async function main() {
         });
         
 }
-main();
+
+const test = false;
+if (test) {
+        main();
+}
+
 
