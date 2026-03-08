@@ -1,1 +1,342 @@
-fortnite sucks
+# LashonLearning
+
+**LashonLearning** is a comprehensive Hebrew vocabulary learning platform that integrates with Sefaria's extensive Jewish text database. The system combines a Chrome browser extension, a React web application, and a Cloudflare Workers proxy to create an intelligent flashcard system powered by real Biblical and Rabbinic text examples.
+
+## 🌟 Overview
+
+LashonLearning helps Hebrew learners build vocabulary by:
+- Capturing Hebrew words directly from Sefaria.org while reading
+- Fetching dictionary definitions from Sefaria's lexicon
+- Finding contextual examples from across Jewish texts
+- Creating interactive flashcards with authentic usage examples
+- Providing a modern, responsive web interface for studying
+
+## 📁 Project Structure
+
+```
+LashonLearning/
+├── SefariaVocabExtension/    # Chrome extension for word capture
+├── react/lashon-learning/     # React web application (Vite + TailwindCSS)
+├── sefaria-proxy/             # Cloudflare Workers CORS proxy
+├── scripts/                   # Shared data fetching utilities
+├── JSONs/                     # Data storage files
+└── img/                       # Image assets
+```
+
+## 🧩 Components
+
+### 1. Chrome Extension: Flashcard Word Grabber
+
+A lightweight Chrome extension that integrates with Sefaria.org to capture Hebrew vocabulary.
+
+#### Features
+- **Context Menu Integration**: Right-click any Hebrew word to add it to your flashcard list
+- **Smart Hebrew Processing**: Automatically strips cantillation marks (taamim) while preserving vowel points (nekudot)
+- **Duplicate Detection**: Prevents the same word from being added multiple times
+- **Local Storage**: Persists word lists in Chrome's local storage
+- **External Messaging API**: Allows the web app to sync word lists via Chrome's messaging system
+- **Visual Popup Interface**: Browse and manage saved words with an elegant Hebrew-optimized UI
+
+#### Technical Details
+- **Manifest Version**: 3 (latest Chrome extension standard)
+- **Permissions**: `storage`, `contextMenus`
+- **External Connectivity**: Configured for `localhost` and `akohlgould.github.io`
+- **Extension ID**: `nlcebalffaibfcnohbknmgpkdoedliej`
+
+#### API Methods
+The extension exposes three message-based API actions:
+- `getFlashcards` - Retrieves the full word list
+- `addWord` - Adds a new word (with duplicate checking)
+- `removeWord` - Removes a word from the list
+
+#### Files
+- `manifest.json` - Extension configuration and permissions
+- `background.js` - Service worker handling context menus, storage, and messaging
+- `popup.html/popup.js` - User interface for viewing and managing saved words
+- `content.js` - Content script (currently minimal)
+
+### 2. React Web Application
+
+A modern single-page application built with React 19, Vite, and TailwindCSS.
+
+#### Features
+- **Flashcard Interface**: Interactive flashcards with flip animations
+- **Word List Management**: View and manage all saved vocabulary
+- **Extension Sync**: Automatic synchronization with the Chrome extension
+- **Responsive Design**: Mobile-friendly interface with TailwindCSS styling
+- **Client-Side Routing**: React Router for seamless navigation
+- **Local Fallback**: Works with localStorage when extension is unavailable
+
+#### Tech Stack
+- **React 19.2.0** - Latest React with concurrent features
+- **Vite 7.3.1** - Lightning-fast build tool and dev server
+- **TailwindCSS 4.2.1** - Utility-first CSS framework
+- **React Router DOM 7.13.1** - Client-side routing
+- **Lucide React** - Beautiful icon library
+- **ESLint** - Code quality and consistency
+
+#### Pages
+- `/` - **FlashcardsPage**: Interactive flashcard study interface
+- `/wordlist` - **WordlistPage**: Comprehensive word list with management tools
+
+#### Development Scripts
+```bash
+cd react/lashon-learning
+
+# Start development server (localhost:5173)
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Deploy to GitHub Pages
+npm run deploy
+
+# Lint code
+npm run lint
+```
+
+#### Deployment
+The app is deployed to GitHub Pages at: `https://akohlgould.github.io/LashonLearning/`
+
+### 3. Sefaria Proxy (Cloudflare Workers)
+
+A serverless CORS proxy that enables the web application to access Sefaria's API from the browser.
+
+#### Why a Proxy?
+Sefaria's API doesn't include CORS headers, which prevents direct browser requests. This Cloudflare Worker acts as a middleware to:
+- Add proper CORS headers for allowed origins
+- Forward requests to `www.sefaria.org/api/*`
+- Handle preflight OPTIONS requests
+- Maintain JSON content types
+
+#### Configuration
+- **Allowed Origins**:
+  - `https://akohlgould.github.io` (production)
+  - `http://localhost:5173` (Vite dev server)
+  - `http://localhost:4173` (Vite preview)
+- **Allowed Methods**: GET, POST, OPTIONS
+- **Allowed Headers**: Content-Type, Accept
+- **Deployment URL**: `https://sefaria-proxy.adamhsefaria.workers.dev`
+
+#### Development & Deployment
+```bash
+cd sefaria-proxy
+
+# Start local development server
+npm run dev
+
+# Deploy to Cloudflare Workers
+npm run deploy
+```
+
+#### Technical Details
+- **Runtime**: Cloudflare Workers (V8 isolates)
+- **Compatibility Date**: 2024-01-01
+- **Path Handling**: Only proxies `/api/*` paths
+- **Error Handling**: Returns 404 for non-API requests
+
+### 4. Scripts Module
+
+Shared JavaScript utilities for fetching and processing data from Sefaria's API.
+
+#### Core Functions
+
+**`generateCards.js`**
+- Orchestrates the flashcard generation process
+- Takes an array of Hebrew words
+- Returns an array of flashcard objects with definitions and verses
+
+**`getdata.js`**
+- Main data fetching logic
+- `getData(word)` - Fetches both definition and contextual verses for a word
+- `getDefinition(word)` - Retrieves dictionary definition from `/api/words/`
+- `getVerses(word)` - Searches for contextual examples using `/api/search-wrapper`
+
+#### Search Algorithm
+The verse search uses Sefaria's naive lemmatizer field with:
+- **Query Type**: Text search
+- **Field**: `naive_lemmatizer` (matches word roots)
+- **Size**: 100 results
+- **Slop**: 10 (allows word variations)
+- **Sort**: By page rank (most significant texts first)
+- **Deduplication**: Removes verse variants (e.g., multiple commentaries on same verse)
+
+#### Environment Detection
+Automatically switches between:
+- **Local Development**: Direct API calls to `localhost` (assumes local Sefaria instance or dev proxy)
+- **Production**: Routes through Cloudflare Workers proxy
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ and npm
+- Chrome browser (for extension)
+- Cloudflare account (for proxy deployment)
+
+### Installation
+
+#### 1. Clone the Repository
+```bash
+git clone https://github.com/akohlgould/LashonLearning.git
+cd LashonLearning
+```
+
+#### 2. Install Dependencies
+```bash
+# Install root dependencies
+npm install
+
+# Install React app dependencies
+cd react/lashon-learning
+npm install
+cd ../..
+
+# Install proxy dependencies
+cd sefaria-proxy
+npm install
+cd ..
+```
+
+#### 3. Load Chrome Extension
+1. Open Chrome and navigate to `chrome://extensions/`
+2. Enable "Developer mode" (top-right toggle)
+3. Click "Load unpacked"
+4. Select the `SefariaVocabExtension/` directory
+5. Note the Extension ID (should match `nlcebalffaibfcnohbknmgpkdoedliej` or update in `App.jsx`)
+
+#### 4. Deploy Cloudflare Proxy
+```bash
+cd sefaria-proxy
+npx wrangler login
+npm run deploy
+```
+Update the `PROXY_BASE` URL in `scripts/getdata.js` with your deployed Worker URL.
+
+#### 5. Start Development Server
+```bash
+cd react/lashon-learning
+npm run dev
+```
+Visit `http://localhost:5173`
+
+## 🎯 Usage Workflow
+
+1. **Capture Words**: While reading on Sefaria.org, right-click any Hebrew word and select "Add to Flashcard List"
+2. **Review Words**: Click the extension icon to see all saved words
+3. **Study Flashcards**: Open the web app to generate flashcards with definitions and contextual examples
+4. **Manage Vocabulary**: Use the wordlist page to review, remove, or add new words manually
+5. **Sync Data**: The app automatically syncs with the extension on load
+
+## 🔧 Configuration
+
+### Extension Configuration
+Edit `SefariaVocabExtension/manifest.json`:
+- Add/remove allowed origins in `externally_connectable.matches`
+- Modify permissions in `permissions` array
+
+### Proxy Configuration
+Edit `sefaria-proxy/src/index.js`:
+- Update `ALLOWED_ORIGINS` array for new domains
+- Modify CORS headers as needed
+
+### App Configuration
+Edit `react/lashon-learning/src/App.jsx`:
+- Update `EXTENSION_ID` if you load the extension unpacked
+- Modify sync behavior in `syncFromExtension()`
+
+## 📊 Data Flow
+
+```
+Sefaria.org (Hebrew Text)
+    ↓ [User selects word]
+Chrome Extension (Storage)
+    ↓ [Sync via chrome.runtime.sendMessage]
+React App (State Management)
+    ↓ [Fetch definitions & verses]
+Cloudflare Proxy
+    ↓ [Forward to Sefaria API]
+Sefaria API
+    ↓ [Return JSON data]
+React App (Render Flashcards)
+```
+
+## 🛠️ Development
+
+### Project Technologies
+- **Frontend**: React 19, Vite, TailwindCSS, React Router
+- **Backend/API**: Cloudflare Workers, Sefaria REST API
+- **Browser**: Chrome Extension Manifest V3
+- **Build Tools**: Vite, ESLint, Wrangler
+- **Deployment**: GitHub Pages, Cloudflare Workers
+
+### Code Style
+- ESLint configuration with React Hooks rules
+- React Refresh for fast development
+- Modern ES6+ JavaScript (modules, async/await)
+
+### Testing the Sefaria API
+```bash
+cd scripts
+node test-sefaria-api.js
+```
+
+## 📝 API Reference
+
+### Sefaria API Endpoints Used
+
+#### Word Definition
+```
+GET /api/words/{word}
+Returns: Array of lexicon entries with definitions, roots, and morphology
+```
+
+#### Text Search
+```
+POST /api/search-wrapper
+Body: {
+  "query": "word",
+  "type": "text",
+  "field": "naive_lemmatizer",
+  "size": 100,
+  "slop": 10,
+  "sort_method": "score",
+  "sort_fields": ["pagesheetrank"]
+}
+Returns: Search results with highlighted matches
+```
+
+## 🤝 Contributing
+
+Contributions welcome! This project is perfect for:
+- Adding new study features (spaced repetition, quizzes)
+- Supporting additional languages or text sources
+- Improving Hebrew text processing
+- Enhancing UI/UX design
+- Adding Anki export functionality (see `scripts/AnkiExport.js`)
+
+## 📄 License
+
+ISC License
+
+## 🔗 Links
+
+- **Live App**: https://akohlgould.github.io/LashonLearning/
+- **GitHub**: https://github.com/akohlgould/LashonLearning
+- **Sefaria**: https://www.sefaria.org
+- **Cloudflare Workers**: https://workers.cloudflare.com
+
+## 🙏 Acknowledgments
+
+- **Sefaria** for their incredible open-source Jewish text database and API
+- The open-source community for React, Vite, and all dependencies
+- Hebrew language learners everywhere
+
+---
+
+**Happy Learning! 📚✨**
+
+*For questions or issues, please open an issue on GitHub.*
