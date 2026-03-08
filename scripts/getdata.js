@@ -88,11 +88,50 @@ function cacheWord(word, data) {
   setCache(cache);
 }
 
+// --- Custom definition overrides (user-selected from Explore page) ---
+const CUSTOM_DEF_KEY = "lashonLearning_customDefinitions";
+
+export function getCustomDefinition(word) {
+  try {
+    const raw = localStorage.getItem(CUSTOM_DEF_KEY);
+    if (!raw) return null;
+    const map = JSON.parse(raw);
+    return map[word] || null;
+  } catch {
+    return null;
+  }
+}
+
+export function setCustomDefinition(word, text) {
+  try {
+    const raw = localStorage.getItem(CUSTOM_DEF_KEY);
+    const map = raw ? JSON.parse(raw) : {};
+    map[word] = text;
+    localStorage.setItem(CUSTOM_DEF_KEY, JSON.stringify(map));
+  } catch {
+    // storage full or unavailable
+  }
+}
+
+export function clearCustomDefinition(word) {
+  try {
+    const raw = localStorage.getItem(CUSTOM_DEF_KEY);
+    if (!raw) return;
+    const map = JSON.parse(raw);
+    delete map[word];
+    localStorage.setItem(CUSTOM_DEF_KEY, JSON.stringify(map));
+  } catch {
+    // silently ignore
+  }
+}
+
 // function to process a word using all the functions below and return the data to be used in the app
 export async function getData(word) {
+  const customDef = getCustomDefinition(word);
+
   const cached = getCachedWord(word);
   if (cached) {
-    return { word, definition: cached.definition, verses: cached.verses };
+    return { word, definition: customDef || cached.definition, verses: cached.verses };
   }
 
   const [definition, verses] = await Promise.all([
@@ -101,7 +140,7 @@ export async function getData(word) {
   ]);
   const result = { word, definition, verses };
   cacheWord(word, result);
-  return result;
+  return { word, definition: customDef || definition, verses };
 }
 
 // Recursively collect all definition strings from a nested senses array
@@ -223,7 +262,7 @@ const SENSE_LANGUAGE_MAP = {
 };
 
 // Strip HTML tags to get plain text
-function stripHtml(html) {
+export function stripHtml(html) {
   if (!html) return "";
   const doc = new DOMParser().parseFromString(html, "text/html");
   return doc.body.textContent || "";
