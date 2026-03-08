@@ -12,6 +12,7 @@ export default function FlashcardsPage() {
   const [cardKey, setCardKey] = useState(0);
   const [customWords, setCustomWords] = useState("");
   const [useCustom, setUseCustom] = useState(false);
+  const [emptyReason, setEmptyReason] = useState("");
 
   const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
 
@@ -37,18 +38,26 @@ export default function FlashcardsPage() {
               console.error("Sync failed:", chrome.runtime.lastError.message);
               setFlashcards([]);
               setUseCustom(true);
+              setEmptyReason("extension-error");
             } else if (response?.success) {
               // FIX: Extract just the word string from the extension objects
               const wordStrings = response.data.map(item =>
                   typeof item === 'object' ? item.word : item
               );
 
-              // Pass the array of strings to generateCards
-              const cards = await generateCards(wordStrings);
-              setFlashcards(cards);
+              if (wordStrings.length === 0) {
+                setFlashcards([]);
+                setEmptyReason("no-words");
+              } else {
+                // Pass the array of strings to generateCards
+                const cards = await generateCards(wordStrings);
+                setFlashcards(cards);
+                setEmptyReason("");
+              }
             } else {
               setFlashcards([]);
               setUseCustom(true);
+              setEmptyReason("extension-error");
             }
             setLoading(false);
             setCurrentIndex(0);
@@ -58,6 +67,7 @@ export default function FlashcardsPage() {
     } else {
       setFlashcards([]);
       setUseCustom(true);
+      setEmptyReason("extension-error");
       setLoading(false);
     }
   };
@@ -206,7 +216,11 @@ export default function FlashcardsPage() {
             </>
           ) : (
             <div className="flex flex-col items-center justify-center gap-3 py-16">
-              <p className="text-zinc-500">Extension couldn't load. Type in words above and press Refresh Flashcards to get started.</p>
+              <p className="text-zinc-500">
+                {emptyReason === "no-words"
+                  ? "No words found. Add words using the Sefaria Vocab Scraper extension, then press Refresh Flashcards."
+                  : "Extension couldn't load. Type in words above and press Refresh Flashcards to get started."}
+              </p>
             </div>
           )}
         </div>
