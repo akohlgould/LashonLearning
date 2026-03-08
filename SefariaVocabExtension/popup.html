@@ -1,17 +1,90 @@
-<!DOCTYPE html>
-<html lang="en"> <head>
-    <meta charset="UTF-8">
-    <title>Flashcard Grabber</title> <style>
-    body { width: 200px; padding: 15px; font-family: sans-serif; text-align: center; }
-    button {
-        width: 100%; padding: 10px; background-color: #4285f4;
-        color: white; border: none; border-radius: 4px; cursor: pointer;
-    }
-</style>
-</head>
-<body>
-<h3>Flashcard Data</h3>
-<button id="download">Download JSON</button>
-<script src="popup.js"></script>
-</body>
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Flashcard Grabber</title>
+        <style>
+            body {
+                width: 260px;
+                padding: 15px;
+                font-family: sans-serif;
+                text-align: center;
+            }
+
+            h3 {
+                margin-top: 0;
+            }
+
+            #word-count {
+                font-size: 13px;
+                color: #555;
+                margin-bottom: 8px;
+            }
+
+            #word-list {
+                list-style: none;
+                padding: 0;
+                margin: 0 0 12px 0;
+                max-height: 200px;
+                overflow-y: auto;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                text-align: right;
+                direction: rtl;
+            }
+
+            #word-list li {
+                padding: 6px 10px;
+                border-bottom: 1px solid #eee;
+                font-size: 15px;
+            }
+
+            #word-list li:last-child {
+                border-bottom: none;
+            }
+
+            #word-list .empty-msg {
+                color: #aaa;
+                font-size: 13px;
+                text-align: center;
+                direction: ltr;
+                padding: 10px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 10px;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                margin-bottom: 8px;
+                font-size: 14px;
+            }
+
+            #download {
+                background-color: #4285f4;
+            }
+
+            #download:hover {
+                background-color: #3367d6;
+            }
+
+            #clear {
+                background-color: #e53935;
+            }
+
+            #clear:hover {
+                background-color: #c62828;
+            }
+        </style>
+    </head>
+    <body>
+        <h3>Flashcard Data</h3>
+        <div id="word-count">Loading...</div>
+        <ul id="word-list"></ul>
+        <button class="btn" id="download">Download JSON</button>
+        <button class="btn" id="clear">Clear All Words</button>
+        <script src="popup.js"></script>
+    </body>
 </html>

@@ -1,22 +1,29 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const downloadBtn = document.getElementById('download');
+document.addEventListener("DOMContentLoaded", function () {
+  const downloadBtn = document.getElementById("download");
+  const clearBtn = document.getElementById("clear");
+  const wordList = document.getElementById("word-list");
+  const wordCount = document.getElementById("word-count");
 
-    downloadBtn.onclick = () => {
-        chrome.storage.local.get({ wordList: [] }, (data) => {
-            if (data.wordList.length === 0) {
-                alert("No words saved yet!");
-                return;
-            }
+  function renderWords(words) {
+    wordList.innerHTML = "";
 
-            const blob = new Blob([JSON.stringify(data.wordList, null, 2)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'flashcards.json';
-            link.click();
+    if (words.length === 0) {
+      wordCount.textContent = "No words saved yet.";
+      const emptyItem = document.createElement("li");
+      emptyItem.className = "empty-msg";
+      emptyItem.textContent = "Right-click any word on Sefaria to add it!";
+      wordList.appendChild(emptyItem);
+      return;
+    }
 
-            // Clean up the URL object
-            setTimeout(() => URL.revokeObjectURL(url), 100);
-        });
-    };
+    wordCount.textContent = `${words.length} word${words.length === 1 ? "" : "s"} saved`;
+
+    // Initial
+    words.forEach(({ word, date }) => {
+      const li = document.createElement("li");
+      li.textContent = `${word} (added on ${new Date(date).toLocaleString()})`;
+      wordList.appendChild(li);
+      wordList.appendChild(li);
+    });
+  }
 });
