@@ -7,18 +7,22 @@ export async function getData(word) {
 // function to get the default translation of a word
 async function getDefinition(word) {
         try {
-        const url = "/api/words/" + word;
-        // get the data from the url
-        const data = await fetch(url);
-        const jsonData = await data.json();
-        // get the definition of the word
-        const definition = jsonData[0].content.senses[0].definition;
-        return definition;}
-        catch (err) {     
+                const url = "/api/words/" + encodeURIComponent(word); // Encode for safety
+                const data = await fetch(url);
+                const jsonData = await data.json();
+
+                // Safety check: ensure the nested properties exist
+                if (jsonData?.[0]?.content?.senses?.[0]?.definition) {
+                        return jsonData[0].content.senses[0].definition;
+                }
+
+                return "Definition not available.";
+        } catch (err) {
                 console.error("Definition Error:", err);
                 return "No definition found.";
         }
 }
+
 
 // function to get 
 async function getVerses(wordtoSearch){ 

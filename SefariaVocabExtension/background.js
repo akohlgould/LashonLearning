@@ -8,18 +8,18 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // Listen for the click
+// background.js
 chrome.contextMenus.onClicked.addListener((info) => {
-    // 'tab' was removed since it wasn't being used
     if (info.menuItemId === "addWord") {
-        // ... rest of your code
-        const word = info.selectionText.trim().toLowerCase();
+        // Trim whitespace but DON'T use toLowerCase() for Hebrew
+        const word = info.selectionText.trim();
 
-        // Retrieve existing list, add new word, and save back
         chrome.storage.local.get({ wordList: [] }, (data) => {
+            // Check for duplicates
+            if (data.wordList.some(item => item.word === word)) return;
+
             const updatedList = [...data.wordList, { word: word, date: new Date().toISOString() }];
-            chrome.storage.local.set({ wordList: updatedList }, () => {
-                console.log(`Saved: ${word}`);
-            });
+            chrome.storage.local.set({ wordList: updatedList });
         });
     }
 });

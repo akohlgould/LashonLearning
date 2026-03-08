@@ -38,14 +38,20 @@ export default function FlashcardsPage() {
               setFlashcards([]);
               setUseCustom(true);
             } else if (response?.success) {
-              console.log("Data pulled from extension:", response.data);
-              const cards = await generateCards(response.data);
+              // FIX: Extract just the word string from the extension objects
+              const wordStrings = response.data.map(item =>
+                  typeof item === 'object' ? item.word : item
+              );
+
+              // Pass the array of strings to generateCards
+              const cards = await generateCards(wordStrings);
               setFlashcards(cards);
             } else {
               setFlashcards([]);
               setUseCustom(true);
             }
             setLoading(false);
+            setCurrentIndex(0);
             setCurrentIndex(0);
           }
       );
