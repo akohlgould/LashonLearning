@@ -12,6 +12,29 @@ export default function FlashcardsPage() {
   const [cardKey, setCardKey] = useState(0);
 
   useEffect(() => {
+    const EXTENSION_ID = "clfjfbninbofghknomnofoilaejkobnd";
+
+    const syncFlashcards = () => {
+      if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage(
+            EXTENSION_ID,
+            { action: "getFlashcards" },
+            (response) => {
+              if (chrome.runtime.lastError) {
+                console.error("Connection failed. Check if Extension ID is correct and extension is reloaded.");
+                return;
+              }
+              if (response && response.success) {
+                console.log("Data pulled from extension:", response.data);
+                // Example: update your state
+                // setWords(response.data);
+              }
+            }
+        );
+      } else {
+        console.warn("Chrome runtime not available. Use a Chrome-based browser.");
+      }
+    };
     generateCards().then((cards) => {
       setFlashcards(cards);
       setLoading(false);
