@@ -61,7 +61,7 @@ export default function FlashcardsPage({
     await syncFromExtension();
   };
 
-  const totalCards = flashcards.length;
+  const totalCards = words.length;
   // ensure index is within bounds if cards change
   const safeIndex = totalCards > 0 ? Math.min(currentIndex, totalCards - 1) : 0;
   const currentCard = flashcards[safeIndex];
