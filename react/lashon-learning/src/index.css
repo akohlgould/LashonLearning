@@ -68,6 +68,12 @@ button {
   background: #a0a0a0;
 }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
 /* Mobile-friendly touch targets and responsive styles */
 @media (max-width: 768px) {
   :root {

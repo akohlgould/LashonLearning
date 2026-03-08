@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import Header from './components/Header'
 import FlashcardsPage from './pages/FlashcardsPage'
 import WordlistPage from './pages/wordlistPage'
+import MatchingPage from './pages/MatchingPage'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 
 const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
@@ -89,6 +90,16 @@ function App() {
               loading={loading}
               syncFromExtension={syncFromExtension}
               updateWords={updateWords}
+            />
+          }
+        />
+        <Route
+          path="/match"
+          element={
+            <MatchingPage
+              words={words}
+              loading={loading}
+              emptyReason={emptyReason}
             />
           }
         />
