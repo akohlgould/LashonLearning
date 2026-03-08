@@ -26,16 +26,17 @@ function getRefs(word) {
   return data;
 }
 
-// testing the function
-async function main() {
-  const word = "למדות";
+// // testing the function
+// async function main() {
+//         const word = "אמר";
 
-  // const url = "https://www.sefaria.org/api/words/" + word;
-  // const testdata = await fetch(url);
-  // const jsonData = await testdata.json();
-  // console.log(jsonData);
+//         const url = "https://www.sefaria.org/api/search-wrapper" + word;
+//         const testdata = await fetch(url);
+//         const jsonData = await testdata.json();
+//         console.log(jsonData);
 
-  const data = await getData(word);
-  console.log(data.word + ": " + data.definition + " - " + data.refs);
-}
-main();
+//         data = await getData(word);
+//         console.log(data.word + ": " + data.definition + " - " + data.refs);
+
+// }
+// main();
