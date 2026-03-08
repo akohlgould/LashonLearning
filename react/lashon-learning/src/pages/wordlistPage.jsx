@@ -13,19 +13,23 @@ export default function WordlistPage({
 
   const removeWord = async (wordToRemove) => {
     if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
-      chrome.runtime.sendMessage(EXTENSION_ID, { action: "removeWord", word: wordToRemove }, async (response) => {
-        let updatedWords;
-        if (response && response.success) {
-          updatedWords = response.data.map(item => item.word);
-        } else {
-          updatedWords = words.filter(w => w !== wordToRemove);
-        }
-        localStorage.setItem('wordList', JSON.stringify(updatedWords));
-        updateWords(updatedWords);
-      });
+      chrome.runtime.sendMessage(
+        EXTENSION_ID,
+        { action: "removeWord", word: wordToRemove },
+        async (response) => {
+          let updatedWords;
+          if (response && response.success) {
+            updatedWords = response.data.map((item) => item.word);
+          } else {
+            updatedWords = words.filter((w) => w !== wordToRemove);
+          }
+          localStorage.setItem("wordList", JSON.stringify(updatedWords));
+          updateWords(updatedWords);
+        },
+      );
     } else {
-      const updatedWords = words.filter(w => w !== wordToRemove);
-      localStorage.setItem('wordList', JSON.stringify(updatedWords));
+      const updatedWords = words.filter((w) => w !== wordToRemove);
+      localStorage.setItem("wordList", JSON.stringify(updatedWords));
       updateWords(updatedWords);
     }
   };
@@ -33,22 +37,26 @@ export default function WordlistPage({
   const addWord = async () => {
     if (newWord.trim()) {
       if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
-        chrome.runtime.sendMessage(EXTENSION_ID, { action: "addWord", word: newWord.trim() }, async (response) => {
-          let updatedWords;
-          if (response && response.success) {
-            updatedWords = response.data.map(item => item.word);
-            setNewWord("");
-          } else {
-            updatedWords = [...words, newWord.trim()];
-            setNewWord("");
-          }
-          localStorage.setItem('wordList', JSON.stringify(updatedWords));
-          updateWords(updatedWords);
-        });
+        chrome.runtime.sendMessage(
+          EXTENSION_ID,
+          { action: "addWord", word: newWord.trim() },
+          async (response) => {
+            let updatedWords;
+            if (response && response.success) {
+              updatedWords = response.data.map((item) => item.word);
+              setNewWord("");
+            } else {
+              updatedWords = [...words, newWord.trim()];
+              setNewWord("");
+            }
+            localStorage.setItem("wordList", JSON.stringify(updatedWords));
+            updateWords(updatedWords);
+          },
+        );
       } else {
         if (words.includes(newWord.trim())) return;
         const updatedWords = [...words, newWord.trim()];
-        localStorage.setItem('wordList', JSON.stringify(updatedWords));
+        localStorage.setItem("wordList", JSON.stringify(updatedWords));
         setNewWord("");
         updateWords(updatedWords);
       }
@@ -60,7 +68,9 @@ export default function WordlistPage({
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-zinc-900">Your Words</h1>
-        <p className="text-zinc-600">{words.length} word{words.length !== 1 ? 's' : ''} to study</p>
+        <p className="text-zinc-600">
+          {words.length} word{words.length !== 1 ? "s" : ""} to study
+        </p>
       </div>
 
       {/* Add Word Section */}
@@ -103,28 +113,33 @@ export default function WordlistPage({
           </div>
         ) : words.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16">
-            <p className="text-zinc-500">No words yet. Add one above to get started!</p>
+            <p className="text-zinc-500">
+              No words yet. Add one above to get started!
+            </p>
           </div>
         ) : (
           <div className="divide-y divide-zinc-200">
             {words.map((word, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between gap-4 p-4 transition hover:bg-zinc-50"
+              <div
+                key={index}
+                className="flex items-center justify-between gap-4 p-4 transition hover:bg-zinc-50"
+              >
+                <button
+                  onClick={() => removeWord(word)}
+                  className="flex-shrink-0 inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100 active:scale-95"
+                  aria-label={`Remove ${word}`}
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-lg font-medium text-zinc-900 break-words" dir="rtl">
-                      {word}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => removeWord(word)}
-                    className="flex-shrink-0 inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100 active:scale-95"
-                    aria-label={`Remove ${word}`}
+                  <Trash2 size={16} />
+                </button>
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="text-lg font-medium text-zinc-900 break-words"
+                    dir="rtl"
                   >
-                    <Trash2 size={16} />
-                  </button>
+                    {word}
+                  </p>
                 </div>
+              </div>
             ))}
           </div>
         )}
