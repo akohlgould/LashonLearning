@@ -42,9 +42,13 @@ export default function Flashcard({
 
   return (
     <div className={`w-full max-w-2xl ${className}`}>
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setShowBack((prev) => !prev)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") setShowBack((prev) => !prev);
+        }}
         className="group relative h-[28rem] w-full rounded-3xl text-left outline-none transition-transform duration-150 hover:scale-[1.01] cursor-pointer"
       >
         {/* Card background styling */}
@@ -178,7 +182,7 @@ export default function Flashcard({
             )}
           </div>
         </div>
-      </button>
+      </div>
     </div>
   );
 }
