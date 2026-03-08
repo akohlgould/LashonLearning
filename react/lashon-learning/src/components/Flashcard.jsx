@@ -17,6 +17,7 @@ export default function Flashcard({
                                     frontMode = "word",
                                   }) {
   const [showBack, setShowBack] = useState(false);
+  const [showAllSources, setShowAllSources] = useState(false);
 
   // 1. Safely check if sources exist (handles Array or Object)
   const hasSources = useMemo(() => {
@@ -105,14 +106,14 @@ export default function Flashcard({
                       <div className="flex flex-col gap-3">
                         {Array.isArray(sources) ? (
                             // Handle Array of strings
-                            sources.map((source, index) => (
+                            (showAllSources ? sources : sources.slice(0, 1)).map((source, index) => (
                                 <div key={index} className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700">
                                   {typeof source === 'object' ? JSON.stringify(source) : String(source)}
                                 </div>
                             ))
                         ) : (
                             // Handle Sefaria Object { "Ref": "Hebrew Text" }
-                            Object.entries(sources).map(([ref, text], index) => (
+                            (showAllSources ? Object.entries(sources) : Object.entries(sources).slice(0, 1)).map(([ref, text], index) => (
                                 <a
                                     key={index}
                                     href={toSefariaUrl(ref)}
@@ -128,6 +129,17 @@ export default function Flashcard({
                                        dangerouslySetInnerHTML={{ __html: String(text) }} />
                                 </a>
                             ))
+                        )}
+                        {(Array.isArray(sources) ? sources.length : Object.keys(sources).length) > 1 && (
+                            <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); setShowAllSources((prev) => !prev); }}
+                                className="text-xs font-medium text-primary hover:underline self-start"
+                            >
+                              {showAllSources
+                                ? "Show less"
+                                : `View ${(Array.isArray(sources) ? sources.length : Object.keys(sources).length) - 1} more source${(Array.isArray(sources) ? sources.length : Object.keys(sources).length) - 1 === 1 ? "" : "s"}`}
+                            </button>
                         )}
                       </div>
                     </div>

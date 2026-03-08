@@ -1,88 +1,37 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import Flashcard from "../components/Flashcard";
 import { exportToAnki } from "../../../../scripts/AnkiExport";
-import { generateCards } from "../../../../scripts/generateCards";
 
-export default function FlashcardsPage() {
-  const [flashcards, setFlashcards] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function FlashcardsPage({
+  flashcards,
+  loading,
+  emptyReason,
+  syncFromExtension,
+  generateFromWords,
+}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [frontMode, setFrontMode] = useState("word");
   const [cardKey, setCardKey] = useState(0);
   const [customWords, setCustomWords] = useState("");
   const [useCustom, setUseCustom] = useState(false);
-  const [emptyReason, setEmptyReason] = useState("");
 
-  const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
-
-  const syncFlashcards = async () => {
-    setLoading(true);
-
-    // If custom words are provided, use those
+  const handleRefresh = async () => {
+    setCurrentIndex(0);
     if (useCustom && customWords.trim()) {
       const wordList = customWords
         .split(/[\n,]+/)
         .map((w) => w.trim())
         .filter(Boolean);
-      const cards = await generateCards(wordList);
-      setFlashcards(cards);
-      setLoading(false);
-      setCurrentIndex(0);
-      return;
-    }
-
-    if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
-      chrome.runtime.sendMessage(
-        EXTENSION_ID,
-        { action: "getFlashcards" },
-        async (response) => {
-          if (chrome.runtime.lastError) {
-            console.error("Sync failed:", chrome.runtime.lastError.message);
-            setFlashcards([]);
-            setUseCustom(true);
-            setEmptyReason("extension-error");
-          } else if (response?.success) {
-            // FIX: Extract just the word string from the extension objects
-            const wordStrings = response.data.map((item) =>
-              typeof item === "object" ? item.word : item,
-            );
-
-            if (wordStrings.length === 0) {
-              setFlashcards([]);
-              setEmptyReason("no-words");
-            } else {
-              // Pass the array of strings to generateCards
-              const cards = await generateCards(wordStrings);
-              setFlashcards(cards);
-              setEmptyReason("");
-            }
-          } else {
-            setFlashcards([]);
-            setUseCustom(true);
-            setEmptyReason("extension-error");
-          }
-          setLoading(false);
-          setCurrentIndex(0);
-          setCurrentIndex(0);
-        },
-      );
+      await generateFromWords(wordList);
     } else {
-      setFlashcards([]);
-      setUseCustom(true);
-      setEmptyReason("extension-error");
-      setLoading(false);
+      await syncFromExtension();
     }
   };
 
-  useEffect(() => {
-    syncFlashcards();
-  }, []);
-
   const totalCards = flashcards.length;
-  const currentCard = flashcards[currentIndex];
-  const progressPercent =
-    totalCards > 0 ? ((currentIndex + 1) / totalCards) * 100 : 0;
+  const safeIndex = totalCards > 0 ? Math.min(currentIndex, totalCards - 1) : 0;
+  const currentCard = flashcards[safeIndex];
 
   const goNext = useCallback(() => {
     if (totalCards === 0) return;
@@ -115,7 +64,7 @@ export default function FlashcardsPage() {
       <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-center gap-3">
           <button
-            onClick={syncFlashcards}
+            onClick={handleRefresh}
             className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90"
           >
             Refresh Flashcards
@@ -194,7 +143,7 @@ export default function FlashcardsPage() {
             </button>
 
             <Flashcard
-              key={`${currentIndex}-${cardKey}`}
+              key={`${safeIndex}-${cardKey}`}
               word={currentCard.word}
               definition={currentCard.definition}
               sources={currentCard.verses}
@@ -233,7 +182,7 @@ export default function FlashcardsPage() {
                 resetCard();
               }}
               className={`h-2 rounded-full transition-all duration-300 ${
-                index === currentIndex
+                index === safeIndex
                   ? "w-8 bg-primary"
                   : "w-2 bg-zinc-300 hover:bg-zinc-400"
               }`}

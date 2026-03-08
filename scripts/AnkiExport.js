@@ -12,6 +12,7 @@ async function convertToTSV(data) {
 }
 
 export async function exportToAnki(data) {
+  console.log(data);
   const tsv = await convertToTSV(data);
   const blob = new Blob([tsv], { type: "text/tab-separated-values" });
 
@@ -25,10 +26,4 @@ export async function exportToAnki(data) {
 
 function randomInArray(array) {
   return array[Math.floor(Math.random() * (array.length - 1))];
-}
-
-async function main() {
-  const entry = await getData("תורה");
-  const data = { cards: [entry] };
-  console.log(convertToTSV(data));
 }
