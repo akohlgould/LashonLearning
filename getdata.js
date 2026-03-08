@@ -46,7 +46,7 @@ async function getVerses(wordtoSearch){
         }
 }
 
-// testing the function
+// // testing the function
 // async function main() {
 //         const word = "אמר";
 
@@ -56,7 +56,7 @@ async function getVerses(wordtoSearch){
 //         // const jsonData = await testdata.json();
 //         // console.log(jsonData);
 
-//         data = await getData(word);
+//         const data = await getData(word);
 //         console.log(data.word + ": " + data.definition + " - " ); 
 //                 for (let i = 0; i < data.verses.length; i++) { 
 //                         console.log(data.verses[i]);
