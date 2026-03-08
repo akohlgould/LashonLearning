@@ -1,5 +1,14 @@
 import React, { useMemo, useState } from "react";
 
+function toSefariaUrl(ref) {
+  const clean = ref.replace(/\s*\(.*\)\s*$/, "").trim();
+  const m = clean.match(/^(.+?)\s+(\d+\w*:\d+)$/);
+  if (!m) return `https://www.sefaria.org/${encodeURIComponent(clean.replace(/\s+/g, "_").replace(/:/g, "."))}?lang=bi`;
+  const book = m[1].replace(/\s+/g, "_");
+  const loc = m[2].replace(/:/g, ".");
+  return `https://www.sefaria.org/${encodeURIComponent(book)}.${encodeURIComponent(loc)}?lang=bi`;
+}
+
 export default function Flashcard({
                                     word,
                                     definition,
@@ -105,9 +114,16 @@ export default function Flashcard({
                             // Handle Sefaria Object { "Ref": "Hebrew Text" }
                             Object.entries(sources).map(([ref, text], index) => (
                                 <div key={index} className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm">
-                                  <div className="text-[10px] font-bold text-primary uppercase mb-1" dir="ltr">
+                                  <a
+                                    href={toSefariaUrl(ref)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="block text-[10px] font-bold text-primary uppercase mb-1 hover:underline"
+                                    dir="ltr"
+                                  >
                                     {String(ref)}
-                                  </div>
+                                  </a>
                                   <div className="text-base text-zinc-800 leading-relaxed font-serif" dir="rtl"
                                        dangerouslySetInnerHTML={{ __html: String(text) }} />
                                 </div>
