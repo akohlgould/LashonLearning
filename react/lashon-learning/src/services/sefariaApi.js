@@ -131,11 +131,22 @@ function collectDefinitions(senses, parts = []) {
 async function getDefinition(word) {
   try {
     const url = "https://www.sefaria.org/api/words/" + encodeURIComponent(word);
-    const data = await fetch(url);
-    if (!data.ok) return "Definition not available.";
-    const jsonData = await data.json();
+    const response = await fetch(url);
+    if (!response.ok) return "Definition not available.";
+    const jsonData = await response.json();
 
-    const topSenses = jsonData?.[0]?.content?.senses;
+    const isInGoodDictionary = (entry) => {
+      let result = false;
+      if (entry.parent_lexicon === "Klein Dictionary") result = true;
+      if (entry.parent_lexicon === "BDB Augmented Strong") result = true;
+      return result;
+    };
+
+    const filtered = jsonData.filter(isInGoodDictionary);
+
+    const data = filtered.length === 0 ? filtered : jsonData;
+
+    const topSenses = data?.[0]?.content?.senses;
     if (!topSenses) return "Definition not available.";
 
     let parts = collectDefinitions(topSenses);
