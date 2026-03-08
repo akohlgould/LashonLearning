@@ -15,6 +15,7 @@ export default function FlashcardsPage() {
     generateCards().then((cards) => {
       setFlashcards(cards);
       setLoading(false);
+      console.log("Generated flashcards:", cards);
     });
   }, []);
 
