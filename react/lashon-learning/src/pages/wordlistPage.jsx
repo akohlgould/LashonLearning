@@ -43,25 +43,22 @@ export default function WordlistPage() {
   }, []);
 
   const removeWord = async (wordToRemove) => {
-    if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
-      chrome.runtime.sendMessage(
-        EXTENSION_ID,
-        { action: "removeWord", word: wordToRemove },
-        async (response) => {
-          if (response?.success) {
-            const updatedWords = response.data.map(item => typeof item === 'object' ? item.word : item);
-            setWords(updatedWords);
-            
-            // Update the cards
-            if (updatedWords.length > 0) {
-              const cards = await generateCards(updatedWords);
-              setWordCards(cards);
-            } else {
-              setWordCards([]);
-            }
+    if (typeof chrome !== "undefined" && chrome.storage) {
+      chrome.storage.local.get({ wordList: [] }, (data) => {
+        const updatedList = data.wordList.filter((item) => item.word !== wordToRemove);
+        chrome.storage.local.set({ wordList: updatedList }, async () => {
+          const updatedWords = updatedList.map(item => typeof item === 'object' ? item.word : item);
+          setWords(updatedWords);
+          
+          // Update the cards
+          if (updatedWords.length > 0) {
+            const cards = await generateCards(updatedWords);
+            setWordCards(cards);
+          } else {
+            setWordCards([]);
           }
-        }
-      );
+        });
+      });
     } else {
       // Fallback for non-extension environments
       const updatedWords = words.filter(w => w !== wordToRemove);
@@ -78,21 +75,26 @@ export default function WordlistPage() {
 
   const addWord = async () => {
     if (newWord.trim()) {
-      if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
-        chrome.runtime.sendMessage(
-          EXTENSION_ID,
-          { action: "addWord", word: newWord.trim() },
-          async (response) => {
-            if (response?.success) {
-              const updatedWords = response.data.map(item => typeof item === 'object' ? item.word : item);
-              setWords(updatedWords);
-              setNewWord("");
-              
-              const cards = await generateCards(updatedWords);
-              setWordCards(cards);
-            }
+      if (typeof chrome !== "undefined" && chrome.storage) {
+        chrome.storage.local.get({ wordList: [] }, (data) => {
+          // Check for duplicates
+          if (data.wordList.some((item) => item.word === newWord.trim())) {
+            return; // Word already exists
           }
-        );
+
+          const updatedList = [
+            ...data.wordList,
+            { word: newWord.trim(), date: new Date().toISOString() },
+          ];
+          chrome.storage.local.set({ wordList: updatedList }, async () => {
+            const updatedWords = updatedList.map(item => typeof item === 'object' ? item.word : item);
+            setWords(updatedWords);
+            setNewWord("");
+            
+            const cards = await generateCards(updatedWords);
+            setWordCards(cards);
+          });
+        });
       } else {
         // Fallback for non-extension environments
         const updatedWords = [...words, newWord.trim()];
