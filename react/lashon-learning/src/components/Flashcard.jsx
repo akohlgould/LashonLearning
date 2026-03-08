@@ -78,7 +78,7 @@ export default function Flashcard({
             <span className="text-xs text-zinc-500">Click to go back</span>
           </div>
 
-          <div className="mt-4 flex-1 overflow-hidden">
+          <div className="mt-4 flex-1 flex flex-col overflow-hidden">
             {isWordFirst ? (
               <p className="text-sm leading-7 text-zinc-700 sm:text-[15px]">
                 {backContent}
@@ -92,20 +92,22 @@ export default function Flashcard({
             )}
 
             {hasSources && (
-              <div className="mt-6">
+              <div className="mt-6 flex min-h-0 flex-1 flex-col">
                 <div className="mb-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
                   Sources
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {sources.map((source, index) => (
-                    <span
-                      key={`${source}-${index}`}
-                      className="rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs text-zinc-600"
-                    >
-                      {source}
-                    </span>
-                  ))}
+                <div className="flex-1 overflow-y-auto rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+                  <div className="flex flex-wrap gap-2">
+                    {sources.map((source, index) => (
+                      <span
+                        key={`${source}-${index}`}
+                        className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs text-zinc-600"
+                      >
+                        {source}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

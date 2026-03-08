@@ -1,6 +1,6 @@
 // function to process a word using all the functions below and return the data to be used in the app
 export async function getData(word) {
-        const url = "https://www.sefaria.org/api/words/" + word;
+        const url = "/api/words/" + word;
         // get the data from the url
         const data = await fetch(url);
         const jsonData = await data.json();
@@ -16,7 +16,7 @@ function getDefinition(word) {
 
 // function to get 
 async function getVerses(wordtoSearch){ 
-        const url = "https://www.sefaria.org/api/search-wrapper";
+        const url = "/api/search-wrapper";
   
         const body = {
                 "query": wordtoSearch,

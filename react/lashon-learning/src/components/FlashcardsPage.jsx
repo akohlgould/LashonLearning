@@ -1,43 +1,22 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, RotateCcw } from "lucide-react";
 import Flashcard from "./Flashcard";
 import { exportToAnki } from "../../../../AnkiExport";
+import { generateCards } from "../../../../generateCards";
 
 export default function FlashcardsPage() {
-  const flashcards = useMemo(
-    () => [
-      {
-        word: "Shalom",
-        definition: "Peace, completeness, wholeness",
-        verses: ["Numbers 6:26", "Psalm 29:11"],
-      },
-      {
-        word: "Chesed",
-        definition: "Mercy, loving-kindness, grace",
-        verses: ["Psalm 23:6", "1 Chronicles 16:34"],
-      },
-      {
-        word: "Teshuvah",
-        definition: "Repentance, return, turning back",
-        verses: ["Deuteronomy 30:2", "Jeremiah 3:22"],
-      },
-      {
-        word: "Emunah",
-        definition: "Faith, trust, belief",
-        verses: ["Habakkuk 2:4", "Romans 1:17"],
-      },
-      {
-        word: "Torah",
-        definition: "Law, instruction, divine teaching",
-        verses: ["Psalm 119:105", "Deuteronomy 4:44"],
-      },
-    ],
-    []
-  );
-
+  const [flashcards, setFlashcards] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [frontMode, setFrontMode] = useState("word"); // "word" | "definition"
   const [cardKey, setCardKey] = useState(0);
+
+  useEffect(() => {
+    generateCards().then((cards) => {
+      setFlashcards(cards);
+      setLoading(false);
+    });
+  }, []);
 
   const currentCard = flashcards[currentIndex];
   const totalCards = flashcards.length;
@@ -88,6 +67,8 @@ export default function FlashcardsPage() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [totalCards]);
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col px-4 py-8 sm:px-6">
@@ -157,7 +138,7 @@ export default function FlashcardsPage() {
               Definition first
             </button>
           </div>
-
+          
           <button
             type="button"
             onClick={resetCard}
@@ -167,8 +148,8 @@ export default function FlashcardsPage() {
             Reset card
           </button>
         </div>
-
-        <button
+        <div className="flex gap-2">
+          <button
           type="button"
           onClick={exportFlashcards}
           className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
@@ -185,6 +166,8 @@ export default function FlashcardsPage() {
           <Download size={16} />
           Export for Anki
         </button>
+      </div>
+        
       </div>
 
       <div className="flex flex-1 items-center justify-center gap-3">
