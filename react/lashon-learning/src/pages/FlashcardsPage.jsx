@@ -1,10 +1,11 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import Flashcard from "../components/Flashcard";
 import { exportToAnki } from "../../../../scripts/AnkiExport";
+import { getData } from "../../../../scripts/getdata";
 
 export default function FlashcardsPage({
-  flashcards,
+  words,
   loading,
   emptyReason,
   syncFromExtension,
@@ -12,27 +13,69 @@ export default function FlashcardsPage({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [frontMode, setFrontMode] = useState("word");
   const [cardKey, setCardKey] = useState(0);
+  const [flashcards, setFlashcards] = useState({});
+  const loadedRef = useRef(new Set());
+
+  const loadCards = useCallback(async (...indices) => {
+    const toLoad = indices.filter(
+      (i) => i >= 0 && i < words.length && !loadedRef.current.has(i),
+    );
+    if (toLoad.length === 0) return;
+    toLoad.forEach((i) => loadedRef.current.add(i));
+    const results = await Promise.all(
+      toLoad.map((i) => getData(words[i]).then((card) => [i, card])),
+    );
+    setFlashcards((prev) => {
+      const next = { ...prev };
+      results.forEach(([i, card]) => {
+        next[i] = card;
+      });
+      return next;
+    });
+  }, [words]);
+
+  // Reset and load initial cards when words change
+  useEffect(() => {
+    setFlashcards({});
+    loadedRef.current = new Set();
+    setCurrentIndex(0);
+    setCardKey((prev) => prev + 1);
+    if (words.length > 0) {
+      loadCards(0, 1);
+    }
+  }, [words, loadCards]);
 
   const handleRefresh = async () => {
     setCurrentIndex(0);
     await syncFromExtension();
   };
 
-  const totalCards = flashcards.length;
+  const totalCards = words.length;
   const safeIndex = totalCards > 0 ? Math.min(currentIndex, totalCards - 1) : 0;
   const currentCard = flashcards[safeIndex];
+  const cardLoading = loading || (totalCards > 0 && !currentCard);
+
+  const navigateTo = useCallback(
+    (index) => {
+      setCurrentIndex(index);
+      setCardKey((prev) => prev + 1);
+      if (totalCards > 0) {
+        const nextIndex = (index + 1) % totalCards;
+        loadCards(index, nextIndex);
+      }
+    },
+    [totalCards, loadCards],
+  );
 
   const goNext = useCallback(() => {
     if (totalCards === 0) return;
-    setCurrentIndex((prev) => (prev + 1) % totalCards);
-    setCardKey((prev) => prev + 1);
-  }, [totalCards]);
+    navigateTo((currentIndex + 1) % totalCards);
+  }, [totalCards, currentIndex, navigateTo]);
 
   const goBack = useCallback(() => {
     if (totalCards === 0) return;
-    setCurrentIndex((prev) => (prev - 1 + totalCards) % totalCards);
-    setCardKey((prev) => prev + 1);
-  }, [totalCards]);
+    navigateTo((currentIndex - 1 + totalCards) % totalCards);
+  }, [totalCards, currentIndex, navigateTo]);
 
   const resetCard = () => setCardKey((prev) => prev + 1);
 
@@ -46,6 +89,8 @@ export default function FlashcardsPage({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goNext, goBack]);
+
+  const loadedCards = Object.values(flashcards);
 
   return (
     <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col px-4 py-8 sm:px-6">
@@ -81,7 +126,7 @@ export default function FlashcardsPage({
           </div>
 
           <button
-            onClick={() => exportToAnki({ cards: flashcards })}
+            onClick={() => exportToAnki({ cards: loadedCards })}
             className="ml-auto inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
           >
             <Download size={16} />
@@ -92,7 +137,7 @@ export default function FlashcardsPage({
 
       {/* Main Flashcard Display Area */}
       <div className="flex flex-1 items-center justify-center gap-3 sm:gap-6">
-        {loading ? (
+        {cardLoading ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
             <p className="text-zinc-600 font-medium">
@@ -140,15 +185,12 @@ export default function FlashcardsPage({
       </div>
 
       {/* Navigation Dot Indicators */}
-      {flashcards.length > 0 && (
+      {totalCards > 0 && (
         <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
-          {flashcards.map((_, index) => (
+          {words.map((_, index) => (
             <button
               key={index}
-              onClick={() => {
-                setCurrentIndex(index);
-                resetCard();
-              }}
+              onClick={() => navigateTo(index)}
               className={`h-2 rounded-full transition-all duration-300 ${
                 index === safeIndex
                   ? "w-8 bg-primary"

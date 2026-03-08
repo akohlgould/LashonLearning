@@ -3,10 +3,9 @@ import { Trash2, RefreshCw, Plus } from "lucide-react";
 
 export default function WordlistPage({
   words,
-  flashcards,
   loading,
   syncFromExtension,
-  generateFromWords,
+  updateWords,
 }) {
   const [newWord, setNewWord] = useState("");
 
@@ -22,12 +21,12 @@ export default function WordlistPage({
           updatedWords = words.filter(w => w !== wordToRemove);
         }
         localStorage.setItem('wordList', JSON.stringify(updatedWords));
-        await generateFromWords(updatedWords);
+        updateWords(updatedWords);
       });
     } else {
       const updatedWords = words.filter(w => w !== wordToRemove);
       localStorage.setItem('wordList', JSON.stringify(updatedWords));
-      await generateFromWords(updatedWords);
+      updateWords(updatedWords);
     }
   };
 
@@ -44,14 +43,14 @@ export default function WordlistPage({
             setNewWord("");
           }
           localStorage.setItem('wordList', JSON.stringify(updatedWords));
-          await generateFromWords(updatedWords);
+          updateWords(updatedWords);
         });
       } else {
         if (words.includes(newWord.trim())) return;
         const updatedWords = [...words, newWord.trim()];
         localStorage.setItem('wordList', JSON.stringify(updatedWords));
         setNewWord("");
-        await generateFromWords(updatedWords);
+        updateWords(updatedWords);
       }
     }
   };
@@ -108,9 +107,7 @@ export default function WordlistPage({
           </div>
         ) : (
           <div className="divide-y divide-zinc-200">
-            {words.map((word, index) => {
-              const card = flashcards.find(c => c.word === word);
-              return (
+            {words.map((word, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between gap-4 p-4 transition hover:bg-zinc-50"
@@ -119,11 +116,6 @@ export default function WordlistPage({
                     <p className="text-lg font-medium text-zinc-900 break-words" dir="rtl">
                       {word}
                     </p>
-                    {card?.definition && (
-                      <p className="text-sm text-zinc-600 mt-1 line-clamp-2">
-                        {card.definition}
-                      </p>
-                    )}
                   </div>
                   <button
                     onClick={() => removeWord(word)}
@@ -133,8 +125,7 @@ export default function WordlistPage({
                     <Trash2 size={16} />
                   </button>
                 </div>
-              );
-            })}
+            ))}
           </div>
         )}
       </div>
