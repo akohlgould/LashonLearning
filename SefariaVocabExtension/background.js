@@ -30,4 +30,42 @@ chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => 
         });
         return true; // Keeps the channel open for the async response
     }
+    
+    if (request.action === "addWord") {
+        const word = request.word?.trim();
+        if (!word) {
+            sendResponse({ success: false, error: "Word is required" });
+            return true;
+        }
+        
+        chrome.storage.local.get({ wordList: [] }, (data) => {
+            // Check for duplicates
+            if (data.wordList.some(item => item.word === word)) {
+                sendResponse({ success: false, error: "Word already exists" });
+                return;
+            }
+            
+            const updatedList = [...data.wordList, { word: word, date: new Date().toISOString() }];
+            chrome.storage.local.set({ wordList: updatedList }, () => {
+                sendResponse({ success: true, data: updatedList });
+            });
+        });
+        return true;
+    }
+    
+    if (request.action === "removeWord") {
+        const word = request.word?.trim();
+        if (!word) {
+            sendResponse({ success: false, error: "Word is required" });
+            return true;
+        }
+        
+        chrome.storage.local.get({ wordList: [] }, (data) => {
+            const updatedList = data.wordList.filter(item => item.word !== word);
+            chrome.storage.local.set({ wordList: updatedList }, () => {
+                sendResponse({ success: true, data: updatedList });
+            });
+        });
+        return true;
+    }
 });
