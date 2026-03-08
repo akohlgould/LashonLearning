@@ -1,5 +1,14 @@
-import React, { useState } from "react";
-import { Trash2, RefreshCw, Plus } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Trash2, RefreshCw, Plus, Share2, Download, X, Check } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+
+function encodeWordList(wordList) {
+  return btoa(encodeURIComponent(JSON.stringify(wordList)));
+}
+
+function decodeWordList(encoded) {
+  return JSON.parse(decodeURIComponent(atob(encoded)));
+}
 
 export default function WordlistPage({
   words,
@@ -8,6 +17,67 @@ export default function WordlistPage({
   updateWords,
 }) {
   const [newWord, setNewWord] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [importWords, setImportWords] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  // Detect shared word list in URL
+  useEffect(() => {
+    const encoded = searchParams.get("words");
+    if (encoded) {
+      try {
+        const decoded = decodeWordList(encoded);
+        if (Array.isArray(decoded) && decoded.length > 0) {
+          setImportWords(decoded);
+        }
+      } catch {
+        console.error("Invalid shared word list URL");
+      }
+    }
+  }, [searchParams]);
+
+  const handleImport = (mode) => {
+    if (!importWords) return;
+    let updatedWords;
+    if (mode === "replace") {
+      updatedWords = importWords;
+    } else {
+      // merge — add only new words
+      const existing = new Set(words);
+      updatedWords = [...words, ...importWords.filter((w) => !existing.has(w))];
+    }
+    localStorage.setItem("wordList", JSON.stringify(updatedWords));
+    updateWords(updatedWords);
+    setImportWords(null);
+    setSearchParams({}, { replace: true });
+  };
+
+  const dismissImport = () => {
+    setImportWords(null);
+    setSearchParams({}, { replace: true });
+  };
+
+  const shareList = async () => {
+    if (words.length === 0) return;
+    const encoded = encodeWordList(words);
+    const base = window.location.href.split("?")[0];
+    const url = `${base}?words=${encoded}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers
+      const input = document.createElement("input");
+      input.value = url;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
 
@@ -71,12 +141,62 @@ export default function WordlistPage({
 
   return (
     <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col px-4 py-8 sm:px-6">
+      {/* Import Banner */}
+      {importWords && (
+        <div className="mb-6 rounded-2xl border border-sky-200 bg-sky-50 p-4 shadow-sm">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <p className="font-medium text-sky-900">
+                Shared word list ({importWords.length} word{importWords.length !== 1 ? "s" : ""})
+              </p>
+              <p className="mt-1 text-sm text-sky-700" dir="rtl">
+                {importWords.slice(0, 5).join("  ·  ")}
+                {importWords.length > 5 && ` … +${importWords.length - 5} more`}
+              </p>
+            </div>
+            <button
+              onClick={dismissImport}
+              className="shrink-0 rounded-lg p-1 text-sky-400 transition hover:bg-sky-100 hover:text-sky-600"
+              aria-label="Dismiss"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <div className="mt-3 flex gap-2">
+            <button
+              onClick={() => handleImport("merge")}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90 active:scale-95"
+            >
+              <Download size={14} />
+              Add to my list
+            </button>
+            <button
+              onClick={() => handleImport("replace")}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-sky-200 bg-white px-4 py-2 text-sm font-medium text-sky-700 transition hover:bg-sky-50 active:scale-95"
+            >
+              Replace my list
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-zinc-900">Your Words</h1>
-        <p className="text-zinc-600">
-          {words.length} word{words.length !== 1 ? "s" : ""} to study
-        </p>
+      <div className="mb-6 flex items-end justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-zinc-900">Your Words</h1>
+          <p className="text-zinc-600">
+            {words.length} word{words.length !== 1 ? "s" : ""} to study
+          </p>
+        </div>
+        {words.length > 0 && (
+          <button
+            onClick={shareList}
+            className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 active:scale-95"
+          >
+            {copied ? <Check size={16} className="text-green-600" /> : <Share2 size={16} />}
+            {copied ? "Link copied!" : "Share List"}
+          </button>
+        )}
       </div>
 
       {/* Add Word Section */}
