@@ -1,14 +1,10 @@
 // function to process a word using all the functions below and return the data to be used in the app
-export async function getData(word) {
-  const url = "https://www.sefaria.org/api/words/" + word;
-  // get the data from the url
-  const data = await fetch(url);
-  const jsonData = await data.json();
-  return {
-    word: word,
-    definition: getDefinition(jsonData),
-    refs: getRefs(jsonData),
-  };
+async function getData(word) {
+        const url = "https://www.sefaria.org/api/words/" + word;
+        // get the data from the url
+        const data = await fetch(url);
+        const jsonData = await data.json();
+        return { word: word, definition: getDefinition(jsonData), verses: await getVerses(word) };
 }
 
 // function to get the default translation of a word
@@ -18,25 +14,53 @@ function getDefinition(word) {
   return definition;
 }
 
-// function to get
-function getRefs(word) {
-  // get a random verse from the tanakh
-  const data = word[0].refs;
+// function to get 
+async function getVerses(wordtoSearch){ 
+        const url = "https://www.sefaria.org/api/search-wrapper";
+  
+        const body = {
+                "query": wordtoSearch,
+                "type": "text",
+                "field": "naive_lemmatizer",
+                "size": 10,
+                "slop": 10,
+                "sort_method": "score",
+                "sort_fields": ["pagesheetrank"]
+        };
 
-  return data;
+        try {
+                const response = await fetch(url, {
+                        method: "POST",
+                        headers: { "accept": "application/json","content-type": "application/json"},
+                        body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+                const verses = [];
+                for (let i = 0; i < data.hits.hits.length; i++) {
+                        verses.push(data.hits.hits[i]._id + ": " + data.hits.hits[i].highlight.naive_lemmatizer);
+                }
+                return verses;
+        } catch (err) {
+                console.error("Search Error:", err);
+        }
 }
 
-// // testing the function
+// testing the function
 // async function main() {
 //         const word = "אמר";
 
-//         const url = "https://www.sefaria.org/api/search-wrapper" + word;
-//         const testdata = await fetch(url);
-//         const jsonData = await testdata.json();
-//         console.log(jsonData);
+
+//         // const url = "https://www.sefaria.org/api/search-wrapper" + word;
+//         // const testdata = await fetch(url);
+//         // const jsonData = await testdata.json();
+//         // console.log(jsonData);
 
 //         data = await getData(word);
-//         console.log(data.word + ": " + data.definition + " - " + data.refs);
-
+//         console.log(data.word + ": " + data.definition + " - " ); 
+//                 for (let i = 0; i < data.verses.length; i++) { 
+//                         console.log(data.verses[i]);
+//                 }
+        
 // }
 // main();
