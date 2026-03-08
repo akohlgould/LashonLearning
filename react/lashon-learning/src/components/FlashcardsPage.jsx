@@ -21,24 +21,24 @@ export default function FlashcardsPage() {
           { action: "getFlashcards" },
           async (response) => {
             if (chrome.runtime.lastError) {
-              console.error("Sync failed:", chrome.runtime.lastError.message);
               const cards = await generateCards();
               setFlashcards(cards);
             } else if (response?.success) {
-              console.log("Data pulled from extension:", response.data);
-              const cards = await generateCards(response.data);
+              // FIX: Extract just the word string from the extension objects
+              const wordStrings = response.data.map(item =>
+                  typeof item === 'object' ? item.word : item
+              );
+
+              // Pass the array of strings to generateCards
+              const cards = await generateCards(wordStrings);
               setFlashcards(cards);
             }
             setLoading(false);
-            setCurrentIndex(0); // Reset to first card on sync
+            setCurrentIndex(0);
           }
       );
-    } else {
-      const cards = await generateCards();
-      setFlashcards(cards);
-      setLoading(false);
     }
-  }, []);
+  }, [generateCards]);
 
   useEffect(() => {
     syncFlashcards();
