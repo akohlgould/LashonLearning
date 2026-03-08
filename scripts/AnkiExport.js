@@ -36,8 +36,3 @@ export async function exportToAnki(data) {
     alert("Export failed. Make sure flashcards are fully loaded before exporting.");
   }
 }
-
-function randomInArray(array) {
-  const index = Math.floor(Math.random() * (array.length - 1));
-  return array[index];
-}
