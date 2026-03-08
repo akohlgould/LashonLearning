@@ -1,14 +1,19 @@
 import { getData } from "./getdata.js";
 
-function exportToAnki(data) {
+async function exportToAnki(data) {
   const cards = data.cards;
-  const tsv = "";
+  let tsv = "";
   for (const card of cards) {
-    const back = `${card.definition}\n${card.refs}`;
-    // console.log(back);
-    tsv.concat(`${card.word}\t${back}\n`);
+    const randomRef = randomInArray(card.refs);
+    const verse = await getVerse(randomRef);
+    const back = `${card.definition};${verse}`;
+    tsv = tsv.concat(`${card.word}\t${back}\n`);
   }
   return tsv;
+}
+
+function randomInArray(array) {
+  return array[Math.floor(Math.random() * array.length)];
 }
 
 async function something() {

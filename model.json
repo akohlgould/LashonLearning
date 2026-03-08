@@ -3,7 +3,7 @@
     {
       "word": "string",
       "definition": "string",
-      "verses": "array of verses containing the word"
+      "verses": "array of verse texts"
     }
   ]
 }
