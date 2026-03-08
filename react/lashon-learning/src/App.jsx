@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Header from './components/Header'
 import FlashcardsPage from './pages/FlashcardsPage'
 import WordlistPage from './pages/wordlistPage'
@@ -68,6 +68,11 @@ function App() {
     }
     setLoading(false);
   }, []);
+
+  // Fetch on app mount
+  useEffect(() => {
+    syncFromExtension();
+  }, [syncFromExtension]);
 
   return (
     <Router>
