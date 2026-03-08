@@ -4,6 +4,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import { encodeWordList, decodeWordList } from "../utils/helpers";
 import { EXTENSION_ID } from "../constants";
 import { importAnkiFile } from "../services/ankiImport";  // new import for TSV parsing
+import { exportToAnki } from "../services/ankiExport";  // import for exporting to Anki
 
 export default function WordlistPage({
   words,
@@ -129,6 +130,11 @@ export default function WordlistPage({
     }
   };
 
+  const exportToAnkiHandler = async () => {
+    if (words.length === 0) return;
+    await exportToAnki(words);
+  };
+
   const removeWord = async (wordToRemove) => {
     if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
       chrome.runtime.sendMessage(
@@ -247,13 +253,22 @@ export default function WordlistPage({
         </div>
         <div className="flex gap-2">
           {words.length > 0 && (
-            <button
-              onClick={shareList}
-              className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 active:scale-95"
-            >
-              {copied ? <Check size={16} className="text-green-600" /> : <Share2 size={16} />}
-              {copied ? "Link copied!" : "Share List"}
-            </button>
+            <>
+              <button
+                onClick={shareList}
+                className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 active:scale-95"
+              >
+                {copied ? <Check size={16} className="text-green-600" /> : <Share2 size={16} />}
+                {copied ? "Link copied!" : "Share List"}
+              </button>
+              <button
+                onClick={exportToAnkiHandler}
+                className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 active:scale-95"
+              >
+                <Download size={16} />
+                Export to Anki
+              </button>
+            </>
           )}
           {/* import from anki file */}
           <button
