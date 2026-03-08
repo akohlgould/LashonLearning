@@ -33,13 +33,19 @@ export default function FlashcardsPage({
     );
     if (toLoad.length === 0) return;
     toLoad.forEach((i) => loadedRef.current.add(i));
-    const results = await Promise.all(
+    const results = await Promise.allSettled(
       toLoad.map((i) => getData(words[i]).then((card) => [i, card])),
     );
     setFlashcards((prev) => {
       const next = { ...prev };
-      results.forEach(([i, card]) => {
-        next[i] = card;
+      results.forEach((result, idx) => {
+        if (result.status === "fulfilled") {
+          const [i, card] = result.value;
+          next[i] = card;
+        } else {
+          console.error(`Failed to load card for "${words[toLoad[idx]]}":`, result.reason);
+          next[toLoad[idx]] = { word: words[toLoad[idx]], definition: "Failed to load.", verses: {} };
+        }
       });
       return next;
     });
@@ -150,7 +156,13 @@ export default function FlashcardsPage({
 
           {/* Export to Anki using helper script */}
           <button
-            onClick={() => exportToAnki({ cards: loadedCards })}
+            onClick={() => {
+              if (loadedCards.length === 0) {
+                alert("No cards loaded yet. Wait for cards to finish loading.");
+                return;
+              }
+              exportToAnki({ cards: loadedCards });
+            }}
             className="ml-auto inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
           >
             <Download size={16} />

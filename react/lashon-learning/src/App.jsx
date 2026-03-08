@@ -39,9 +39,15 @@ function App() {
     } else {
       const stored = localStorage.getItem('wordList');
       if (stored) {
-        const wordList = JSON.parse(stored);
-        setWords(wordList);
-        setEmptyReason(wordList.length === 0 ? "no-words" : "");
+        try {
+          const wordList = JSON.parse(stored);
+          setWords(wordList);
+          setEmptyReason(wordList.length === 0 ? "no-words" : "");
+        } catch {
+          localStorage.removeItem('wordList');
+          setWords([]);
+          setEmptyReason("no-words");
+        }
       } else {
         setWords([]);
         setEmptyReason("no-words");

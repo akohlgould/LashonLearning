@@ -17,6 +17,9 @@ export default function WordlistPage({
         EXTENSION_ID,
         { action: "removeWord", word: wordToRemove },
         async (response) => {
+          if (chrome.runtime.lastError) {
+            console.error("removeWord failed:", chrome.runtime.lastError.message);
+          }
           let updatedWords;
           if (response && response.success) {
             updatedWords = response.data.map((item) => item.word);
@@ -41,6 +44,9 @@ export default function WordlistPage({
           EXTENSION_ID,
           { action: "addWord", word: newWord.trim() },
           async (response) => {
+            if (chrome.runtime.lastError) {
+              console.error("addWord failed:", chrome.runtime.lastError.message);
+            }
             let updatedWords;
             if (response && response.success) {
               updatedWords = response.data.map((item) => item.word);
