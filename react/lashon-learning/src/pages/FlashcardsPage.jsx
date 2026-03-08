@@ -13,7 +13,7 @@ export default function FlashcardsPage() {
   const [customWords, setCustomWords] = useState("");
   const [useCustom, setUseCustom] = useState(false);
 
-  const EXTENSION_ID = "clfjfbninbofghknomnofoilaejkobnd";
+  const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
 
   const syncFlashcards = async () => {
     setLoading(true);
