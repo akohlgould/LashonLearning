@@ -1,7 +1,7 @@
 // function to process a word using all the functions below and return the data to be used in the app
 export async function getData(word) {
         
-        return { word: word, definition: getDefinition(word), verses: await getVerses(word) };
+        return { word: word, definition: await getDefinition(word), verses: await getVerses(word) };
 }
 
 // function to get the default translation of a word
@@ -43,49 +43,46 @@ async function getVerses(wordtoSearch){
 
                 const data = await response.json();
                 const verses = {};
+                const seen = new Set();
                 for (let i = 0; i < data.hits.hits.length; i++) {
+                        // remove duplicates 
+                        const key = data.hits.hits[i]._id;
+                        const keyStart = key.split("(")[0];
+                        if (seen.has(keyStart)) {
+                                continue;
+                        }
+                        seen.add(keyStart);
+
+
                         verses[data.hits.hits[i]._id] = data.hits.hits[i].highlight.naive_lemmatizer.join(" ");
                 }
-                return await cleanData(verses);
+                return await verses;
         } catch (err) {
                 console.error("Search Error:", err);
                 return [];
         }
 }
 
-// clean the data to make sure we only have one version of any text
-async function cleanData(verses) {
-        const uniqueVerses = [];
-        const seen = new Set();
-        for (const verse of verses) {
-                const key = Object.keys(verse)[0];
-                const newKey = key.split("(")[0]; // remove the version part
-                if (!seen.has(newKey)) {
-                        seen.add(newKey);
-                        uniqueVerses.push(verse);
-                }
-        }
-        return uniqueVerses;
-}
-
-// testing the function not to file
-async function main() {
-        const word = "אמר";
 
 
-        // const url = "https://www.sefaria.org/api/search-wrapper" + word;
-        // const testdata = await fetch(url);
-        // const jsonData = await testdata.json();
-        // console.log(jsonData);
+// // testing the function not to file
+// async function main() {
+//         const word = "אמר";
 
-        const data = await getData(word);
-        console.log(data.word + ": " + data.definition + " - " ); 
-                // for (let i = 0; i < data.verses.length; i++) { 
-                //         console.log(data.verses[i]);
-                // }
+
+//         // const url = "https://www.sefaria.org/api/search-wrapper" + word;
+//         // const testdata = await fetch(url);
+//         // const jsonData = await testdata.json();
+//         // console.log(jsonData);
+
+//         const data = await getData(word);
+//         console.log(data.word + ": " + data.definition + " - " ); 
+//                 for (let i = 0; i < Object.keys(data.verses).length; i++) { 
+//                         console.log(Object.values(data.verses)[i]);
+//                 }
         
-}
-main();
+// }
+// main();
 
 
 // import fs from 'fs';
