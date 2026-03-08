@@ -138,7 +138,6 @@ async function getDefinition(word) {
     const topSenses = jsonData?.[0]?.content?.senses;
     if (!topSenses) return "Definition not available.";
 
-
     let parts = collectDefinitions(topSenses);
 
     parts = parts.filter((part) => {
@@ -148,7 +147,6 @@ async function getDefinition(word) {
     if (parts.length === 0) return "Definition not available.";
 
     return parts[0];
-
   } catch (err) {
     console.error("Definition Error:", err);
     return "No definition found.";
@@ -197,7 +195,7 @@ export async function getVerses(wordtoSearch) {
       verses[hits[i]._id] =
         hits[i].highlight?.naive_lemmatizer?.join(" ") ?? "";
     }
-    return await verses;
+    return verses;
   } catch (err) {
     console.error("Search Error:", err);
     return [];
@@ -358,8 +356,10 @@ export async function getImportantLexiconInformation(word) {
         result.relatedEntries = extractHeadwordsFromRefs(entry.refs);
       }
       // Navigation
-      if (!result.prevHeadword && entry.prev_hw) result.prevHeadword = entry.prev_hw;
-      if (!result.nextHeadword && entry.next_hw) result.nextHeadword = entry.next_hw;
+      if (!result.prevHeadword && entry.prev_hw)
+        result.prevHeadword = entry.prev_hw;
+      if (!result.nextHeadword && entry.next_hw)
+        result.nextHeadword = entry.next_hw;
 
       // Definitions
       if (entry.content?.senses) {
@@ -409,7 +409,10 @@ export async function getImportantLexiconInformation(word) {
         result.definitionsBySource.push({
           source: "BDB Dictionary",
           language: LANGUAGE_MAP[lang] || "Biblical Hebrew",
-          morphology: entry.content?.senses?.[0]?.definition?.match(/^<strong>(.*?)<\/strong>/)?.[1] || null,
+          morphology:
+            entry.content?.senses?.[0]?.definition?.match(
+              /^<strong>(.*?)<\/strong>/,
+            )?.[1] || null,
           senses: collectSensesForDisplay(entry.content.senses),
         });
       }
