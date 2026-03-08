@@ -1,5 +1,5 @@
 import { getData } from './getdata.js';
-import defaultWords from './test_words.json';
+import defaultWords from '../test_words.json';
 
 
 export async function generateCards() {

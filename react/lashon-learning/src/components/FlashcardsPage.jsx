@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, RotateCcw } from "lucide-react";
 import Flashcard from "./Flashcard";
-import { exportToAnki } from "../../../../AnkiExport";
-import { generateCards } from "../../../../generateCards";
+import { exportToAnki } from "../../../../scripts/AnkiExport";
+import { generateCards } from "../../../../scripts/generateCards";
 
 export default function FlashcardsPage() {
   const [flashcards, setFlashcards] = useState([]);
