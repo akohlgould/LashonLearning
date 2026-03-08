@@ -39,6 +39,15 @@
     #sefaria-vocab-fab .fab-icon {
       pointer-events: none;
       line-height: 1;
+      /* make room for an image if used */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #sefaria-vocab-fab .fab-icon img {
+      width: 28px;
+      height: 28px;
+      object-fit: contain;
     }
     #sefaria-vocab-fab .fab-badge {
       position: absolute;
@@ -192,7 +201,11 @@
   const fab = document.createElement("button");
   fab.id = "sefaria-vocab-fab";
   fab.title = "Word List";
-  fab.innerHTML = `<span class="fab-icon">📚</span><span class="fab-badge" style="display:none">0</span>`;
+  // use the extension's icon.png for the FAB by resolving its URL
+  const iconUrl = chrome.runtime && chrome.runtime.getURL
+    ? chrome.runtime.getURL("icon.png")
+    : "icon.png"; // fallback if runtime not available
+  fab.innerHTML = `<span class="fab-icon"><img src="${iconUrl}" alt="vocab icon"/></span><span class="fab-badge" style="display:none">0</span>`;
   document.body.appendChild(fab);
 
   const badge = fab.querySelector(".fab-badge");
