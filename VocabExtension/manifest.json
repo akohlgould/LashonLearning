@@ -21,13 +21,10 @@
   "web_accessible_resources": [
     {
       "resources": ["icon.png"],
-      "matches": ["<all_urls>"]
+      "matches": ["*://*.sefaria.org/*", "*://*.sefaria.org.il/*"]
     }
   ],
   "externally_connectable": {
-    "matches": [
-      "http://localhost/*",
-      "https://akohlgould.github.io/*"
-    ]
+    "matches": ["http://localhost/*", "https://akohlgould.github.io/*"]
   }
 }

@@ -33,13 +33,19 @@ export default function FlashcardsPage({
     );
     if (toLoad.length === 0) return;
     toLoad.forEach((i) => loadedRef.current.add(i));
-    const results = await Promise.all(
+    const results = await Promise.allSettled(
       toLoad.map((i) => getData(words[i]).then((card) => [i, card])),
     );
     setFlashcards((prev) => {
       const next = { ...prev };
-      results.forEach(([i, card]) => {
-        next[i] = card;
+      results.forEach((result, idx) => {
+        if (result.status === "fulfilled") {
+          const [i, card] = result.value;
+          next[i] = card;
+        } else {
+          console.error(`Failed to load card for "${words[toLoad[idx]]}":`, result.reason);
+          next[toLoad[idx]] = { word: words[toLoad[idx]], definition: "Failed to load.", verses: {} };
+        }
       });
       return next;
     });
@@ -51,10 +57,13 @@ export default function FlashcardsPage({
     loadedRef.current = new Set();
     setCurrentIndex(0);
     setCardKey((prev) => prev + 1);
+  }, [words]);
+
+  useEffect(() => {
     if (words.length > 0) {
       loadCards(0, 1);
     }
-  }, [words, loadCards]);
+  }, [words.length, loadCards]);
 
   const handleRefresh = async () => {
     setCurrentIndex(0);
@@ -110,7 +119,7 @@ export default function FlashcardsPage({
   const loadedCards = Object.values(flashcards);
 
   return (
-    <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col px-4 py-8 sm:px-6">
+    <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 py-8 sm:px-6">
       
       {/* Settings Bar */}
       <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
@@ -148,18 +157,14 @@ export default function FlashcardsPage({
 
           {/* Export to Anki using helper script */}
           <button
-            disabled={exporting || totalCards === 0}
-            onClick={async () => {
-              setExporting(true);
-              try {
-                await exportToAnki(words);
-              } catch (err) {
-                console.error("Export failed:", err);
-              } finally {
-                setExporting(false);
+            onClick={() => {
+              if (loadedCards.length === 0) {
+                alert("No cards loaded yet. Wait for cards to finish loading.");
+                return;
               }
+              exportToAnki({ cards: loadedCards });
             }}
-            className="ml-auto inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-50"
+            className="ml-auto inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
           >
             <Download size={16} />
             {exporting ? "Exporting…" : "Export Anki"}
@@ -168,7 +173,7 @@ export default function FlashcardsPage({
       </div>
 
       {/* Main Flashcard Display Area */}
-      <div className="flex items-center justify-center gap-5 mt-12">
+      <div className="flex items-center justify-center gap-2 sm:gap-5 mt-12">
         {cardLoading ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
@@ -182,10 +187,10 @@ export default function FlashcardsPage({
             <button
               type="button"
               onClick={goBack}
-              className="inline-flex h-16 w-16 hover:scale-[1.05] transition-all flex-shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
+              className="inline-flex h-12 w-12 sm:h-16 sm:w-16 hover:scale-[1.05] shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
               aria-label="Previous flashcard"
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
             </button>
 
             <Flashcard
@@ -200,10 +205,10 @@ export default function FlashcardsPage({
             <button
               type="button"
               onClick={goNext}
-              className="inline-flex h-16 w-16 hover:scale-[1.05] transition-all flex-shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
+              className="inline-flex h-12 w-12 sm:h-16 sm:w-16 hover:scale-[1.05] shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
               aria-label="Next flashcard"
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={20} className="sm:w-6 sm:h-6" />
             </button>
           </>
         ) : (

@@ -1,5 +1,18 @@
 import React, { useMemo, useState } from "react";
 
+function sanitizeHtml(html) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  doc.querySelectorAll("script,style,iframe,object,embed,link").forEach((el) => el.remove());
+  doc.querySelectorAll("*").forEach((el) => {
+    for (const attr of [...el.attributes]) {
+      if (attr.name.startsWith("on") || (attr.name === "href" && attr.value.trimStart().startsWith("javascript:"))) {
+        el.removeAttribute(attr.name);
+      }
+    }
+  });
+  return doc.body.innerHTML;
+}
+
 function toSefariaUrl(ref) {
   const clean = ref.replace(/\s*\(.*\)\s*$/, "").trim();
   const m = clean.match(/^(.+?)\s+(\d+\w*:\d+)$/);
@@ -49,7 +62,7 @@ export default function Flashcard({
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") setShowBack((prev) => !prev);
         }}
-        className="group relative h-[25rem] w-full rounded-3xl text-left outline-none transition-transform duration-150 hover:scale-[1.01] cursor-pointer"
+        className="flashcard group relative h-80 sm:h-100 w-full rounded-3xl text-left outline-none transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99] cursor-pointer touch-manipulation"
       >
         {/* Card background styling */}
         <div className="absolute inset-0 rounded-3xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.08)] ring-2 ring-black/5" />
@@ -57,7 +70,7 @@ export default function Flashcard({
 
         {/* --- FRONT SIDE --- */}
         <div
-          className={`absolute inset-0 flex flex-col justify-between rounded-3xl p-8 transition-opacity duration-300 ${
+          className={`flashcard-content absolute inset-0 flex flex-col justify-between rounded-3xl p-4 sm:p-8 transition-opacity duration-300 ${
             showBack ? "pointer-events-none opacity-0" : "opacity-100"
           }`}
         >
@@ -70,7 +83,7 @@ export default function Flashcard({
 
           <div className="flex flex-1 items-center justify-center px-4">
             <h2
-              className={`text-center font-bold text-zinc-900 ${isWordFirst ? "text-5xl" : "text-2xl"}`}
+              className={`text-center font-bold text-zinc-900 ${isWordFirst ? "text-3xl sm:text-5xl" : "text-xl sm:text-2xl"}`}
               dir={isWordFirst ? "rtl" : "ltr"}
             >
               {frontContent}
@@ -84,7 +97,7 @@ export default function Flashcard({
 
         {/* --- BACK SIDE --- */}
         <div
-          className={`absolute inset-0 flex flex-col rounded-3xl p-8 transition-opacity duration-300 ${
+          className={`flashcard-content absolute inset-0 flex flex-col rounded-3xl p-4 sm:p-8 transition-opacity duration-300 ${
             showBack ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
@@ -98,7 +111,7 @@ export default function Flashcard({
           <div className="mt-4 flex flex-1 flex-col overflow-hidden">
             <div className="flex items-center justify-center py-4">
               <h2
-                className={`text-center font-semibold text-zinc-900 ${!isWordFirst ? "text-5xl" : "text-2xl"}`}
+                className={`text-center font-semibold text-zinc-900 ${!isWordFirst ? "text-3xl sm:text-5xl" : "text-xl sm:text-2xl"}`}
                 dir={!isWordFirst ? "rtl" : "ltr"}
               >
                 {backContent}
@@ -149,7 +162,7 @@ export default function Flashcard({
                             <div
                               className="text-base text-zinc-800 leading-relaxed font-serif"
                               dir="rtl"
-                              dangerouslySetInnerHTML={{ __html: String(text) }}
+                              dangerouslySetInnerHTML={{ __html: sanitizeHtml(String(text)) }}
                             />
                           </a>
                         ))}

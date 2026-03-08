@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import Header from './components/Header'
 import FlashcardsPage from './pages/FlashcardsPage'
 import WordlistPage from './pages/wordlistPage'
+import MatchingPage from './pages/MatchingPage'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 
 const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
@@ -39,9 +40,15 @@ function App() {
     } else {
       const stored = localStorage.getItem('wordList');
       if (stored) {
-        const wordList = JSON.parse(stored);
-        setWords(wordList);
-        setEmptyReason(wordList.length === 0 ? "no-words" : "");
+        try {
+          const wordList = JSON.parse(stored);
+          setWords(wordList);
+          setEmptyReason(wordList.length === 0 ? "no-words" : "");
+        } catch {
+          localStorage.removeItem('wordList');
+          setWords([]);
+          setEmptyReason("no-words");
+        }
       } else {
         setWords([]);
         setEmptyReason("no-words");
@@ -83,6 +90,16 @@ function App() {
               loading={loading}
               syncFromExtension={syncFromExtension}
               updateWords={updateWords}
+            />
+          }
+        />
+        <Route
+          path="/match"
+          element={
+            <MatchingPage
+              words={words}
+              loading={loading}
+              emptyReason={emptyReason}
             />
           }
         />

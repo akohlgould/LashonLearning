@@ -15,6 +15,7 @@ const Header = () => {
       </h1>
       <div className="flex ml-6 gap-8 font-semibold text-[#666666]">
         <Link to="/" className={pathname === "/" ? "text-primary" : ""}><span>Flashcards</span></Link>
+        <Link to="/match" className={pathname === "/match" ? "text-primary" : ""}><span>Match</span></Link>
         <Link to="/wordlist" className={pathname === "/wordlist" ? "text-primary" : ""}><span>Word List</span></Link>
       </div>
 

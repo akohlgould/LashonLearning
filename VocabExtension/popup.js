@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
       wordCount.textContent = "No words saved yet.";
       const emptyItem = document.createElement("li");
       emptyItem.className = "empty-msg";
-      emptyItem.textContent = "Right-click any word on Sefaria to add it!";
+      emptyItem.textContent = "Right-click a Hebrew word to add it!";
       wordList.appendChild(emptyItem);
       return;
     }
@@ -51,10 +51,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const toggleFab = document.getElementById("toggle-fab");
   const toggleTooltip = document.getElementById("toggle-tooltip");
 
-  chrome.storage.local.get({ fabEnabled: true, tooltipEnabled: true }, (data) => {
-    toggleFab.checked = data.fabEnabled;
-    toggleTooltip.checked = data.tooltipEnabled;
-  });
+  chrome.storage.local.get(
+    { fabEnabled: true, tooltipEnabled: true },
+    (data) => {
+      toggleFab.checked = data.fabEnabled;
+      toggleTooltip.checked = data.tooltipEnabled;
+    },
+  );
 
   toggleFab.addEventListener("change", () => {
     chrome.storage.local.set({ fabEnabled: toggleFab.checked });
