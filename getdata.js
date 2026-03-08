@@ -1,5 +1,5 @@
 // function to process a word using all the functions below and return the data to be used in the app
-async function getData(word) {
+export async function getData(word) {
   const url = "https://www.sefaria.org/api/words/" + word;
   // get the data from the url
   const data = await fetch(url);
@@ -35,7 +35,7 @@ async function main() {
   // const jsonData = await testdata.json();
   // console.log(jsonData);
 
-  data = await getData(word);
+  const data = await getData(word);
   console.log(data.word + ": " + data.definition + " - " + data.refs);
 }
 main();
