@@ -1,9 +1,9 @@
-const SEFARIA_BASE = "https://www.sefaria.org";
+const PROXY_BASE = "https://sefaria-proxy.adamhsefaria.workers.dev";
 const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
 
 function sefariaUrl(path) {
         if (isLocal) return path;
-        return `https://corsproxy.io/?${encodeURIComponent(SEFARIA_BASE + path)}`;
+        return PROXY_BASE + path;
 }
 
 // function to process a word using all the functions below and return the data to be used in the app
