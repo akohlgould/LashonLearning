@@ -1,0 +1,20 @@
+{
+  "name": "lashonlearning",
+  "version": "1.0.0",
+  "description": "fortnite sucks",
+  "homepage": "https://github.com/akohlgould/LashonLearning#readme",
+  "bugs": {
+    "url": "https://github.com/akohlgould/LashonLearning/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akohlgould/LashonLearning.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "getdata.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
