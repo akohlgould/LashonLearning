@@ -1,20 +1,10 @@
 import { getData } from './getdata.js';
-import defaultWords from '../test_words.json';
 
-
-export async function generateCards() {
-    let wordList;
-    try {
-        const stored = localStorage.getItem('words');
-        if (stored) {
-            wordList = JSON.parse(stored);
-        }
-    } catch {
-        // ignore parse errors
-    }
-
+export async function generateCards(words) {
+    let wordList = words;
+    
     if (!Array.isArray(wordList) || wordList.length === 0) {
-        wordList = defaultWords;
+        wordList = [];
     }
 
     const cards = [];
