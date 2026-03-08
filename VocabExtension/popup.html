@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Flashcard Grabber</title>
+        <!-- load same fonts as the main site -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Cardo:ital,wght@0,400;0,700;1,400&family=Heebo:wght@100..900&family=Noto+Serif+Hebrew:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            body {
+                width: 260px;
+                padding: 15px;
+                /* match root font stack from website */
+                font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+                text-align: center;
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+
+            h3 {
+                margin-top: 0;
+            }
+
+            .word-item {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .word-item .remove-btn {
+                flex-shrink: 0;
+                margin-right: 8px;
+                padding: 2px 8px;
+                font-size: 11px;
+                color: white;
+                background-color: #e53935;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            .word-item .remove-btn:hover {
+                background-color: #c62828;
+            }
+
+            #word-count {
+                font-size: 13px;
+                color: #555;
+                margin-bottom: 8px;
+            }
+
+            #word-list {
+                list-style: none;
+                padding: 0;
+                margin: 0 0 12px 0;
+                max-height: 200px;
+                overflow-y: auto;
+                border: 1px solid #d0d7de;
+                border-radius: 8px;
+                text-align: right;
+                direction: rtl;
+                background-color: #fff;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            }
+
+            #word-list::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            #word-list::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            #word-list::-webkit-scrollbar-thumb {
+                background: #c4c4c4;
+                border-radius: 3px;
+            }
+
+            #word-list::-webkit-scrollbar-thumb:hover {
+                background: #a0a0a0;
+            }
+
+            #word-list li {
+                padding: 8px 12px;
+                border-bottom: 1px solid #f0f0f0;
+                font-size: 16px;
+                font-family: "Heebo", "David", serif;
+                color: #1a1a1a;
+                letter-spacing: 0.01em;
+                transition: background-color 0.15s ease;
+                border-radius: 4px;
+                margin: 2px 4px; /* give a bit of breathing room for the rounding */
+            }
+
+            #word-list li:hover {
+                background-color: #f5f8ff;
+            }
+
+            #word-list li:last-child {
+                border-bottom: none;
+            }
+
+            #word-list .empty-msg {
+                color: #aaa;
+                font-size: 13px;
+                text-align: center;
+                direction: ltr;
+                /* match the website's English sans-serif stack */
+                font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+                padding: 14px 10px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 10px;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                margin-bottom: 8px;
+                font-size: 14px;
+                transition: background-color 0.2s ease;
+            }
+
+            #download {
+                background-color: #4285f4;
+            }
+
+            #download:hover {
+                background-color: #3367d6;
+            }
+
+            #clear {
+                background-color: #e53935;
+            }
+
+            #clear:hover {
+                background-color: #c62828;
+            }
+            .settings-section {
+                margin-top: 14px;
+                padding-top: 12px;
+                border-top: 1px solid #e0e0e0;
+                text-align: left;
+            }
+
+            .settings-section h4 {
+                margin: 0 0 8px 0;
+                font-size: 13px;
+                color: #555;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .toggle-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 6px 0;
+            }
+
+            .toggle-row label {
+                font-size: 13px;
+                color: #333;
+                cursor: pointer;
+            }
+
+            .toggle-switch {
+                position: relative;
+                width: 36px;
+                height: 20px;
+                flex-shrink: 0;
+            }
+
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            .toggle-slider {
+                position: absolute;
+                cursor: pointer;
+                inset: 0;
+                background-color: #ccc;
+                border-radius: 20px;
+                transition: 0.2s;
+            }
+
+            .toggle-slider::before {
+                content: "";
+                position: absolute;
+                height: 14px;
+                width: 14px;
+                left: 3px;
+                bottom: 3px;
+                background-color: white;
+                border-radius: 50%;
+                transition: 0.2s;
+            }
+
+            .toggle-switch input:checked + .toggle-slider {
+                background-color: #4285f4;
+            }
+
+            .toggle-switch input:checked + .toggle-slider::before {
+                transform: translateX(16px);
+            }
+        </style>
+    </head>
+    <body>
+        <h3>Flashcard Data</h3>
+        <button id="open-app" class="btn" style="background-color: #18345d; margin-bottom: 8px;">
+            Open App
+        </button>
+        <div id="word-count">Loading...</div>
+        <ul id="word-list"></ul>
+
+        <div class="settings-section">
+            <h4>Settings</h4>
+            <label class="toggle-row">
+                <span>Floating button</span>
+                <span class="toggle-switch">
+                    <input type="checkbox" id="toggle-fab" checked />
+                    <span class="toggle-slider"></span>
+                </span>
+            </label>
+            <label class="toggle-row">
+                <span>Selection tooltip</span>
+                <span class="toggle-switch">
+                    <input type="checkbox" id="toggle-tooltip" checked />
+                    <span class="toggle-slider"></span>
+                </span>
+            </label>
+        </div>
+
+        <script src="popup.js"></script>
+    </body>
+</html>

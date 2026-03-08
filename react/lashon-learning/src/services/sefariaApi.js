@@ -65,6 +65,10 @@ function setCache(cache) {
   }
 }
 
+export function clearCache() {
+  localStorage.removeItem(CACHE_KEY);
+}
+
 function getCachedWord(word) {
   const cache = getCache();
   if (!(word in cache.entries)) return null;
@@ -147,12 +151,21 @@ export async function getData(word) {
 }
 
 // Recursively collect all definition strings from a nested senses array
-function collectDefinitions(senses, parts = []) {
+function collectDefinitions(senses, parts = [], badDict = false) {
   if (!Array.isArray(senses)) return parts;
   for (const sense of senses) {
     if (sense.definition) {
+      const italicMatch = sense.definition.match(
+        "<(?:i|em)\\b[^>]*>(.*?)<\\/(?:i|em)>",
+      );
+      const italic = italicMatch ? italicMatch[1] : sense.definition;
+      console.log(italicMatch);
       const prefix = sense.number ? `${sense.number}. ` : "";
-      parts.push(prefix + stripHtml(sense.definition));
+      if (badDict) {
+        parts.push(prefix + stripHtml(italic));
+      } else {
+        parts.push(prefix + stripHtml(sense.definition));
+      }
     }
     if (sense.grammar?.verbal_stem) {
       // label the binyan group
@@ -186,12 +199,14 @@ async function getDefinition(word) {
 
     const filtered = jsonData.filter(isInGoodDictionary);
 
-    const data = filtered.length === 0 ? filtered : jsonData;
+    const data = filtered.length === 0 ? jsonData : filtered;
+
+    console.log(data, filtered.length === 0);
 
     const topSenses = data?.[0]?.content?.senses;
     if (!topSenses) return "Definition not available.";
 
-    let parts = collectDefinitions(topSenses);
+    let parts = collectDefinitions(topSenses, [], filtered.length === 0);
 
     parts = parts.filter((part) => {
       return !partsofspeech.has(part.trim().toLowerCase().replace(".", ""));
