@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Download, RotateCcw } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import Flashcard from "./Flashcard";
 import { exportToAnki } from "../../../../scripts/AnkiExport";
 import { generateCards } from "../../../../scripts/generateCards";
@@ -10,11 +10,24 @@ export default function FlashcardsPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [frontMode, setFrontMode] = useState("word");
   const [cardKey, setCardKey] = useState(0);
+  const [customWords, setCustomWords] = useState("");
+  const [useCustom, setUseCustom] = useState(false);
 
   const EXTENSION_ID = "clfjfbninbofghknomnofoilaejkobnd";
 
-  const syncFlashcards = useCallback(async () => {
+  const syncFlashcards = async () => {
     setLoading(true);
+
+    // If custom words are provided, use those
+    if (useCustom && customWords.trim()) {
+      const wordList = customWords.split(/[\n,]+/).map(w => w.trim()).filter(Boolean);
+      const cards = await generateCards(wordList);
+      setFlashcards(cards);
+      setLoading(false);
+      setCurrentIndex(0);
+      return;
+    }
+
     if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
       chrome.runtime.sendMessage(
           EXTENSION_ID,
@@ -22,27 +35,30 @@ export default function FlashcardsPage() {
           async (response) => {
             if (chrome.runtime.lastError) {
               console.error("Sync failed:", chrome.runtime.lastError.message);
-              const cards = await generateCards(["אמר", "דבר", "עשה", "ראה", "שמע"]);
-              setFlashcards(cards);
+              setFlashcards([]);
+              setUseCustom(true);
             } else if (response?.success) {
               console.log("Data pulled from extension:", response.data);
               const cards = await generateCards(response.data);
               setFlashcards(cards);
+            } else {
+              setFlashcards([]);
+              setUseCustom(true);
             }
             setLoading(false);
-            setCurrentIndex(0); // Reset to first card on sync
+            setCurrentIndex(0);
           }
       );
     } else {
-      const cards = await generateCards(["אמר", "דבר", "עשה", "ראה", "שמע"]);
-      setFlashcards(cards);
+      setFlashcards([]);
+      setUseCustom(true);
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     syncFlashcards();
-  }, [syncFlashcards]);
+  }, []);
 
   const totalCards = flashcards.length;
   const currentCard = flashcards[currentIndex];
@@ -85,12 +101,20 @@ export default function FlashcardsPage() {
   if (!currentCard) {
     return (
         <div className="flex h-screen flex-col items-center justify-center gap-4 bg-zinc-50">
-          <p className="text-zinc-600">No cards found in extension storage.</p>
+          <p className="text-zinc-600">Extension couldn't load. Please type in words to get started.</p>
+          <textarea
+            value={customWords}
+            onChange={(e) => setCustomWords(e.target.value)}
+            placeholder="Enter words separated by commas or newlines, e.g.&#10;אמר&#10;דבר&#10;עשה"
+            className="w-80 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            rows={4}
+            dir="rtl"
+          />
           <button
               onClick={syncFlashcards}
               className="rounded-xl bg-emerald-600 px-6 py-2 text-white hover:bg-emerald-700"
           >
-            Try Sync Again
+            Load Flashcards
           </button>
         </div>
     );
@@ -114,8 +138,25 @@ export default function FlashcardsPage() {
         </div>
 
         {/* Settings Bar */}
-        <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
           <div className="flex flex-wrap items-center gap-3">
+            <button
+                onClick={syncFlashcards}
+                className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700"
+            >
+              Refresh Flashcards
+            </button>
+
+            <label className="inline-flex items-center gap-2 text-sm text-zinc-600 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={useCustom}
+                onChange={(e) => setUseCustom(e.target.checked)}
+                className="accent-emerald-600"
+              />
+              Use typed words
+            </label>
+
             <div className="inline-flex rounded-xl border border-zinc-200 bg-zinc-50 p-1">
               <button
                   onClick={() => { setFrontMode("word"); resetCard(); }}
@@ -132,30 +173,24 @@ export default function FlashcardsPage() {
             </div>
 
             <button
-                onClick={resetCard}
-                className="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700 transition hover:bg-zinc-50"
-            >
-              <RotateCcw size={16} />
-              Reset Card
-            </button>
-
-            <button
-                onClick={syncFlashcards}
-                className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700"
-            >
-              Sync Extension
-            </button>
-          </div>
-
-          <div className="flex gap-2">
-            <button
                 onClick={() => exportToAnki({ cards: flashcards })}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                className="ml-auto inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
             >
               <Download size={16} />
               Export Anki
             </button>
           </div>
+
+          {useCustom && (
+            <textarea
+              value={customWords}
+              onChange={(e) => setCustomWords(e.target.value)}
+              placeholder="Enter words separated by commas or newlines, e.g.&#10;אמר&#10;דבר&#10;עשה"
+              className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              rows={3}
+              dir="rtl"
+            />
+          )}
         </div>
 
         {/* Main Flashcard Display Area */}
