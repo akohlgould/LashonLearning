@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, RotateCcw } from "lucide-react";
 import Flashcard from "./Flashcard";
+import { exportToAnki } from "../../../../AnkiExport";
 
 export default function FlashcardsPage() {
   const flashcards = useMemo(
@@ -40,7 +41,7 @@ export default function FlashcardsPage() {
 
   const currentCard = flashcards[currentIndex];
   const totalCards = flashcards.length;
-  const progressPercent = ((currentIndex + 1) / totalCards) * 100;
+  // const progressPercent = ((currentIndex + 1) / totalCards) * 100;
 
   const goNext = () => {
     setCurrentIndex((prev) => (prev + 1) % totalCards);
@@ -174,6 +175,15 @@ export default function FlashcardsPage() {
         >
           <Download size={16} />
           Export
+        </button>
+
+        <button
+          type="button"
+          onClick={() => exportToAnki({cards: flashcards})}
+          className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+        >
+          <Download size={16} />
+          Export for Anki
         </button>
       </div>
 
