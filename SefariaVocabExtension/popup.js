@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   const downloadBtn = document.getElementById("download");
   const clearBtn = document.getElementById("clear");
   const wordList = document.getElementById("word-list");
@@ -18,12 +18,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     wordCount.textContent = `${words.length} word${words.length === 1 ? "" : "s"} saved`;
 
-    // Initial
-    words.forEach(({ word, date }) => {
+    words.forEach(({ word }) => {
       const li = document.createElement("li");
-      li.textContent = `${word} (added on ${new Date(date).toLocaleString()})`;
-      wordList.appendChild(li);
+      li.textContent = `${word}`;
       wordList.appendChild(li);
     });
   }
+  chrome.storage.local.get({ wordList: [] }, (data) => {
+    renderWords(data.wordList);
+  });
 });
