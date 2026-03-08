@@ -1,46 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Trash2, RefreshCw, Plus } from "lucide-react";
-import { generateCards } from "../../../../scripts/generateCards";
 
-export default function WordlistPage() {
-  const [words, setWords] = useState([]);
-  const [wordCards, setWordCards] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function WordlistPage({
+  words,
+  flashcards,
+  loading,
+  syncFromExtension,
+  generateFromWords,
+}) {
   const [newWord, setNewWord] = useState("");
-  const [useExtension, setUseExtension] = useState(true);
+  const hasSynced = useRef(false);
 
   const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
 
-  const syncWords = async () => {
-    setLoading(true);
-
-    if (useExtension && typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
-      chrome.runtime.sendMessage(
-        EXTENSION_ID,
-        { action: "getFlashcards" },
-        async (response) => {
-          if (response?.success && response.data) {
-            const wordStrings = response.data.map(item =>
-              typeof item === 'object' ? item.word : item
-            );
-            setWords(wordStrings);
-            const cards = await generateCards(wordStrings);
-            setWordCards(cards);
-          } else {
-            setWords([]);
-            setWordCards([]);
-          }
-          setLoading(false);
-        }
-      );
-    } else {
-      setLoading(false);
-    }
-  };
-
+  // Initial fetch on first mount only
   useEffect(() => {
-    syncWords();
-  }, []);
+    if (!hasSynced.current && words.length === 0) {
+      hasSynced.current = true;
+      syncFromExtension();
+    }
+  }, [syncFromExtension, words.length]);
 
   const removeWord = async (wordToRemove) => {
     if (typeof chrome !== "undefined" && chrome.storage) {
@@ -48,28 +27,12 @@ export default function WordlistPage() {
         const updatedList = data.wordList.filter((item) => item.word !== wordToRemove);
         chrome.storage.local.set({ wordList: updatedList }, async () => {
           const updatedWords = updatedList.map(item => typeof item === 'object' ? item.word : item);
-          setWords(updatedWords);
-          
-          // Update the cards
-          if (updatedWords.length > 0) {
-            const cards = await generateCards(updatedWords);
-            setWordCards(cards);
-          } else {
-            setWordCards([]);
-          }
+          await generateFromWords(updatedWords);
         });
       });
     } else {
-      // Fallback for non-extension environments
       const updatedWords = words.filter(w => w !== wordToRemove);
-      setWords(updatedWords);
-      
-      if (updatedWords.length > 0) {
-        const cards = await generateCards(updatedWords);
-        setWordCards(cards);
-      } else {
-        setWordCards([]);
-      }
+      await generateFromWords(updatedWords);
     }
   };
 
@@ -77,9 +40,8 @@ export default function WordlistPage() {
     if (newWord.trim()) {
       if (typeof chrome !== "undefined" && chrome.storage) {
         chrome.storage.local.get({ wordList: [] }, (data) => {
-          // Check for duplicates
           if (data.wordList.some((item) => item.word === newWord.trim())) {
-            return; // Word already exists
+            return;
           }
 
           const updatedList = [
@@ -88,21 +50,14 @@ export default function WordlistPage() {
           ];
           chrome.storage.local.set({ wordList: updatedList }, async () => {
             const updatedWords = updatedList.map(item => typeof item === 'object' ? item.word : item);
-            setWords(updatedWords);
             setNewWord("");
-            
-            const cards = await generateCards(updatedWords);
-            setWordCards(cards);
+            await generateFromWords(updatedWords);
           });
         });
       } else {
-        // Fallback for non-extension environments
         const updatedWords = [...words, newWord.trim()];
-        setWords(updatedWords);
         setNewWord("");
-        
-        const cards = await generateCards(updatedWords);
-        setWordCards(cards);
+        await generateFromWords(updatedWords);
       }
     }
   };
@@ -137,7 +92,7 @@ export default function WordlistPage() {
             Add
           </button>
           <button
-            onClick={syncWords}
+            onClick={syncFromExtension}
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
           >
             <RefreshCw size={16} />
@@ -160,7 +115,7 @@ export default function WordlistPage() {
         ) : (
           <div className="divide-y divide-zinc-200">
             {words.map((word, index) => {
-              const card = wordCards.find(c => c.word === word);
+              const card = flashcards.find(c => c.word === word);
               return (
                 <div
                   key={index}
