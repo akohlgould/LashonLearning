@@ -65,6 +65,10 @@ function setCache(cache) {
   }
 }
 
+export function clearCache() {
+  localStorage.removeItem(CACHE_KEY);
+}
+
 function getCachedWord(word) {
   const cache = getCache();
   if (!(word in cache.entries)) return null;
