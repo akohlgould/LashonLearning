@@ -22,8 +22,8 @@ async function getVerses(wordtoSearch){
                 "query": wordtoSearch,
                 "type": "text",
                 "field": "naive_lemmatizer",
-                "size": 10,
-                "slop": 10,
+                "size": 100,
+                "slop": 100,
                 "sort_method": "score",
                 "sort_fields": ["pagesheetrank"]
         };
