@@ -43,7 +43,7 @@ export default function Flashcard({
               }`}
           >
             <div className="flex items-center justify-between">
-            <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium tracking-wide text-emerald-700">
+            <span className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium tracking-wide text-primary">
               {frontLabel}
             </span>
               <span className="text-xs text-zinc-400">Click to reveal</span>
@@ -105,7 +105,7 @@ export default function Flashcard({
                             // Handle Sefaria Object { "Ref": "Hebrew Text" }
                             Object.entries(sources).map(([ref, text], index) => (
                                 <div key={index} className="rounded-lg border border-zinc-200 bg-white p-3 shadow-sm">
-                                  <div className="text-[10px] font-bold text-emerald-700 uppercase mb-1" dir="ltr">
+                                  <div className="text-[10px] font-bold text-primary uppercase mb-1" dir="ltr">
                                     {String(ref)}
                                   </div>
                                   <div className="text-base text-zinc-800 leading-relaxed font-serif" dir="rtl"

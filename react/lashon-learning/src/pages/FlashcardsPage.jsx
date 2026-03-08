@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
-import Flashcard from "./Flashcard";
+import Flashcard from "../components/Flashcard";
 import { exportToAnki } from "../../../../scripts/AnkiExport";
 import { generateCards } from "../../../../scripts/generateCards";
 
@@ -98,30 +98,8 @@ export default function FlashcardsPage() {
   if (loading) {
     return (
         <div className="flex h-screen flex-col items-center justify-center gap-4 bg-zinc-50">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-emerald-500 border-t-transparent"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
           <p className="text-zinc-600 font-medium">Loading Hebrew Flashcards...</p>
-        </div>
-    );
-  }
-
-  if (!currentCard) {
-    return (
-        <div className="flex h-screen flex-col items-center justify-center gap-4 bg-zinc-50">
-          <p className="text-zinc-600">Extension couldn't load. Please type in words to get started.</p>
-          <textarea
-            value={customWords}
-            onChange={(e) => setCustomWords(e.target.value)}
-            placeholder="Enter words separated by commas or newlines, e.g.&#10;אמר&#10;דבר&#10;עשה"
-            className="w-80 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            rows={4}
-            dir="rtl"
-          />
-          <button
-              onClick={syncFlashcards}
-              className="rounded-xl bg-emerald-600 px-6 py-2 text-white hover:bg-emerald-700"
-          >
-            Load Flashcards
-          </button>
         </div>
     );
   }
@@ -137,7 +115,7 @@ export default function FlashcardsPage() {
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200">
             <div
-                className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                className="h-full rounded-full bg-primary transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -148,7 +126,7 @@ export default function FlashcardsPage() {
           <div className="flex flex-wrap items-center gap-3">
             <button
                 onClick={syncFlashcards}
-                className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700"
+                className="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90"
             >
               Refresh Flashcards
             </button>
@@ -158,7 +136,7 @@ export default function FlashcardsPage() {
                 type="checkbox"
                 checked={useCustom}
                 onChange={(e) => setUseCustom(e.target.checked)}
-                className="accent-emerald-600"
+                className="accent-primary"
               />
               Use typed words
             </label>
@@ -192,7 +170,7 @@ export default function FlashcardsPage() {
               value={customWords}
               onChange={(e) => setCustomWords(e.target.value)}
               placeholder="Enter words separated by commas or newlines, e.g.&#10;אמר&#10;דבר&#10;עשה"
-              className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary"
               rows={3}
               dir="rtl"
             />
@@ -201,47 +179,57 @@ export default function FlashcardsPage() {
 
         {/* Main Flashcard Display Area */}
         <div className="flex flex-1 items-center justify-center gap-3 sm:gap-6">
-          <button
-              type="button"
-              onClick={goBack}
-              className="inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
-              aria-label="Previous flashcard"
-          >
-            <ChevronLeft size={24} />
-          </button>
+          {currentCard ? (
+            <>
+              <button
+                  type="button"
+                  onClick={goBack}
+                  className="inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
+                  aria-label="Previous flashcard"
+              >
+                <ChevronLeft size={24} />
+              </button>
 
-          <Flashcard
-              key={`${currentIndex}-${cardKey}`}
-              word={currentCard.word}
-              definition={currentCard.definition}
-              sources={currentCard.verses}
-              frontMode={frontMode}
-              className="w-full"
-          />
+              <Flashcard
+                  key={`${currentIndex}-${cardKey}`}
+                  word={currentCard.word}
+                  definition={currentCard.definition}
+                  sources={currentCard.verses}
+                  frontMode={frontMode}
+                  className="w-full"
+              />
 
-          <button
-              type="button"
-              onClick={goNext}
-              className="inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
-              aria-label="Next flashcard"
-          >
-            <ChevronRight size={24} />
-          </button>
+              <button
+                  type="button"
+                  onClick={goNext}
+                  className="inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
+                  aria-label="Next flashcard"
+              >
+                <ChevronRight size={24} />
+              </button>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-3 py-16">
+              <p className="text-zinc-500">Extension couldn't load. Type in words above and press Refresh Flashcards to get started.</p>
+            </div>
+          )}
         </div>
 
         {/* Navigation Dot Indicators */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
-          {flashcards.map((_, index) => (
-              <button
-                  key={index}
-                  onClick={() => { setCurrentIndex(index); resetCard(); }}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                      index === currentIndex ? "w-8 bg-emerald-600" : "w-2 bg-zinc-300 hover:bg-zinc-400"
-                  }`}
-                  aria-label={`Go to card ${index + 1}`}
-              />
-          ))}
-        </div>
+        {flashcards.length > 0 && (
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+            {flashcards.map((_, index) => (
+                <button
+                    key={index}
+                    onClick={() => { setCurrentIndex(index); resetCard(); }}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                        index === currentIndex ? "w-8 bg-primary" : "w-2 bg-zinc-300 hover:bg-zinc-400"
+                    }`}
+                    aria-label={`Go to card ${index + 1}`}
+                />
+            ))}
+          </div>
+        )}
       </div>
   );
 }
