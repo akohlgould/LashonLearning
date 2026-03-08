@@ -11,7 +11,7 @@ export default function FlashcardsPage() {
   const [frontMode, setFrontMode] = useState("word");
   const [cardKey, setCardKey] = useState(0);
 
-  const EXTENSION_ID = "clfjfbninbofghknomnofoilaejkobnd";
+  const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
 
   const syncFlashcards = useCallback(async () => {
     setLoading(true);
