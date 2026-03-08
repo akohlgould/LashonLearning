@@ -4,6 +4,6 @@
     "version": "1.0",
     "permissions": ["storage", "contextMenus"],
     "background": {
-    "service_worker": "background.js"
-}
+        "service_worker": "background.js"
+    }
 }

@@ -95,15 +95,6 @@ export default function FlashcardsPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goNext, goBack]);
 
-  if (loading) {
-    return (
-        <div className="flex h-screen flex-col items-center justify-center gap-4 bg-zinc-50">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          <p className="text-zinc-600 font-medium">Loading Hebrew Flashcards...</p>
-        </div>
-    );
-  }
-
   return (
       <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col px-4 py-8 sm:px-6">
 
@@ -179,7 +170,12 @@ export default function FlashcardsPage() {
 
         {/* Main Flashcard Display Area */}
         <div className="flex flex-1 items-center justify-center gap-3 sm:gap-6">
-          {currentCard ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-16">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+              <p className="text-zinc-600 font-medium">Loading Hebrew Flashcards...</p>
+            </div>
+          ) : currentCard ? (
             <>
               <button
                   type="button"
