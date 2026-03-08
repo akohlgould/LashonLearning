@@ -23,6 +23,7 @@ export default function WordlistPage({
       });
     } else {
       const updatedWords = words.filter(w => w !== wordToRemove);
+      localStorage.setItem('wordList', JSON.stringify(updatedWords));
       await generateFromWords(updatedWords);
     }
   };
@@ -46,7 +47,9 @@ export default function WordlistPage({
           });
         });
       } else {
+        if (words.includes(newWord.trim())) return;
         const updatedWords = [...words, newWord.trim()];
+        localStorage.setItem('wordList', JSON.stringify(updatedWords));
         setNewWord("");
         await generateFromWords(updatedWords);
       }

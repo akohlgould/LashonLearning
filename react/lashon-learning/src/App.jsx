@@ -49,9 +49,23 @@ function App() {
         },
       );
     } else {
-      setWords([]);
-      setFlashcards([]);
-      setEmptyReason("extension-error");
+      const stored = localStorage.getItem('wordList');
+      if (stored) {
+        const wordList = JSON.parse(stored);
+        setWords(wordList);
+        if (wordList.length > 0) {
+          const cards = await generateCards(wordList);
+          setFlashcards(cards);
+          setEmptyReason("");
+        } else {
+          setFlashcards([]);
+          setEmptyReason("no-words");
+        }
+      } else {
+        setWords([]);
+        setFlashcards([]);
+        setEmptyReason("no-words");
+      }
       setLoading(false);
     }
   }, []);
