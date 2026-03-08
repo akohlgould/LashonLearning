@@ -110,7 +110,7 @@ function collectDefinitions(senses, parts = []) {
   for (const sense of senses) {
     if (sense.definition) {
       const prefix = sense.number ? `${sense.number}. ` : "";
-      parts.push(prefix + sense.definition);
+      parts.push(prefix + stripHtml(sense.definition));
     }
     if (sense.grammar?.verbal_stem) {
       // label the binyan group
