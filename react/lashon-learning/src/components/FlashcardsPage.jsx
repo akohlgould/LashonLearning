@@ -22,7 +22,7 @@ export default function FlashcardsPage() {
           async (response) => {
             if (chrome.runtime.lastError) {
               console.error("Sync failed:", chrome.runtime.lastError.message);
-              const cards = await generateCards();
+              const cards = await generateCards(["אמר", "דבר", "עשה", "ראה", "שמע"]);
               setFlashcards(cards);
             } else if (response?.success) {
               console.log("Data pulled from extension:", response.data);
@@ -34,7 +34,7 @@ export default function FlashcardsPage() {
           }
       );
     } else {
-      const cards = await generateCards();
+      const cards = await generateCards(["אמר", "דבר", "עשה", "ראה", "שמע"]);
       setFlashcards(cards);
       setLoading(false);
     }

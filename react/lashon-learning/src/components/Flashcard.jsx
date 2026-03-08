@@ -108,9 +108,8 @@ export default function Flashcard({
                                   <div className="text-[10px] font-bold text-emerald-700 uppercase mb-1" dir="ltr">
                                     {String(ref)}
                                   </div>
-                                  <div className="text-base text-zinc-800 leading-relaxed font-serif" dir="rtl">
-                                    {String(text)}
-                                  </div>
+                                  <div className="text-base text-zinc-800 leading-relaxed font-serif" dir="rtl"
+                                       dangerouslySetInnerHTML={{ __html: String(text) }} />
                                 </div>
                             ))
                         )}
