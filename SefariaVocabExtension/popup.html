@@ -128,12 +128,100 @@
             #clear:hover {
                 background-color: #c62828;
             }
+            .settings-section {
+                margin-top: 14px;
+                padding-top: 12px;
+                border-top: 1px solid #e0e0e0;
+                text-align: left;
+            }
+
+            .settings-section h4 {
+                margin: 0 0 8px 0;
+                font-size: 13px;
+                color: #555;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .toggle-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 6px 0;
+            }
+
+            .toggle-row label {
+                font-size: 13px;
+                color: #333;
+                cursor: pointer;
+            }
+
+            .toggle-switch {
+                position: relative;
+                width: 36px;
+                height: 20px;
+                flex-shrink: 0;
+            }
+
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            .toggle-slider {
+                position: absolute;
+                cursor: pointer;
+                inset: 0;
+                background-color: #ccc;
+                border-radius: 20px;
+                transition: 0.2s;
+            }
+
+            .toggle-slider::before {
+                content: '';
+                position: absolute;
+                height: 14px;
+                width: 14px;
+                left: 3px;
+                bottom: 3px;
+                background-color: white;
+                border-radius: 50%;
+                transition: 0.2s;
+            }
+
+            .toggle-switch input:checked + .toggle-slider {
+                background-color: #4285f4;
+            }
+
+            .toggle-switch input:checked + .toggle-slider::before {
+                transform: translateX(16px);
+            }
         </style>
     </head>
     <body>
         <h3>Flashcard Data</h3>
         <div id="word-count">Loading...</div>
         <ul id="word-list"></ul>
+
+        <div class="settings-section">
+            <h4>Settings</h4>
+            <label class="toggle-row">
+                <span>Floating button (FAB)</span>
+                <span class="toggle-switch">
+                    <input type="checkbox" id="toggle-fab" checked />
+                    <span class="toggle-slider"></span>
+                </span>
+            </label>
+            <label class="toggle-row">
+                <span>Selection tooltip</span>
+                <span class="toggle-switch">
+                    <input type="checkbox" id="toggle-tooltip" checked />
+                    <span class="toggle-slider"></span>
+                </span>
+            </label>
+        </div>
+
         <script src="popup.js"></script>
     </body>
 </html>

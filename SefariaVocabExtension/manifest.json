@@ -11,6 +11,13 @@
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [
+    {
+      "matches": ["*://*.sefaria.org/*", "*://*.sefaria.org.il/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "externally_connectable": {
     "matches": [
       "http://localhost/*",

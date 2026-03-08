@@ -46,4 +46,21 @@ document.addEventListener("DOMContentLoaded", () => {
   chrome.storage.local.get({ wordList: [] }, (data) => {
     renderWords(data.wordList);
   });
+
+  // ─── Settings toggles ───
+  const toggleFab = document.getElementById("toggle-fab");
+  const toggleTooltip = document.getElementById("toggle-tooltip");
+
+  chrome.storage.local.get({ fabEnabled: true, tooltipEnabled: true }, (data) => {
+    toggleFab.checked = data.fabEnabled;
+    toggleTooltip.checked = data.tooltipEnabled;
+  });
+
+  toggleFab.addEventListener("change", () => {
+    chrome.storage.local.set({ fabEnabled: toggleFab.checked });
+  });
+
+  toggleTooltip.addEventListener("change", () => {
+    chrome.storage.local.set({ tooltipEnabled: toggleTooltip.checked });
+  });
 });
