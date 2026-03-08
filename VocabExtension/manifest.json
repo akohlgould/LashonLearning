@@ -1,12 +1,18 @@
 {
   "manifest_version": 3,
-  "name": "Flashcard Word Grabber",
+  "name": "Lashon Learning",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvwL1F4JZtLwI+/6GekLKwOhJ/MXBqUHDpAupZ0o3FU2Rkh3QDQ1tR8iVdnKRBjWl2CDc3BFBUxbOHP2T21Zar2iezdS9HMW0PUuRqzeVWgFZXzVZPAO4hnPIT51fnOts5zNhQLdcRByrOdUE6RhHQha0qJN1SdomPwqxoeXZV3ojy5ZcVzGMVLg9/wdqmeSTbEBkGFrZF8kN/PTWuO224iLrY1bnq6cCNChaRDMSxt+lmgpXADkbbdybGIrqQ6ZraBOA121HGfs7AGWuUy9yjPrMTjrsDmmp063KBsjA9J5dU2Y47A3SNCmp3Sd/mI/8e3K98PI81VdGq5L2aO/dPwIDAQAB",
   "version": "1.0",
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
   "permissions": ["storage", "contextMenus"],
   "action": {
+    "default_icon": "icon.png",
     "default_popup": "popup.html",
-    "default_title": "Flashcard Word Grabber"
+    "default_title": "Lashon Learning"
   },
   "background": {
     "service_worker": "background.js"
