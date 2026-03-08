@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-lashonia-primary: #18345D;
+  --color-lashonia-accent: #4871BF;
+  --color-lashonia-bg: #FBFBFA;
+  --color-lashonia-highlight: #DDEEFF;
+}
+
+/* Typography per Style Guide */
+.font-hebrew-serif {
+  font-family: 'Taamey Frank CLM', 'SBL Hebrew', serif;
+}
+
+.font-hebrew-sans {
+  font-family: 'Heebo', sans-serif;
+}
+
+.font-english-serif {
+  font-family: 'Adobe Garamond Pro', 'Garamond', serif;
+}
+
+.font-english-sans {
+  font-family: 'Roboto', 'Inter', sans-serif;
+}
