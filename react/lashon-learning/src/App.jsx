@@ -3,12 +3,13 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import Header from './components/Header'
 import MainContent from './components/MainContent'
+import FlashcardsPage from './components/FlashcardsPage'
 
 function App() {
   return (
     <>
       <Header />
-      <MainContent />    
+      <FlashcardsPage />    
     </>
   )
 }

@@ -35,6 +35,10 @@
   color: black;
 }
 
+button {
+  cursor: pointer;
+}
+
 @theme {
   --color-primary: var(--theme-primary);
   --color-background: var(--theme-background);
