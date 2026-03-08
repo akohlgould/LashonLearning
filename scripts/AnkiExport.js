@@ -24,7 +24,7 @@ export async function exportToAnki(data) {
   console.log(data);
   const tsv = await convertToTSV(data);
   const blob = new Blob([tsv], { type: "text/tab-separated-values" });
-
+  try {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
