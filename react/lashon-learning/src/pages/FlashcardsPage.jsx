@@ -62,6 +62,7 @@ export default function FlashcardsPage({
   };
 
   const totalCards = words.length;
+
   // ensure index is within bounds if cards change
   const safeIndex = totalCards > 0 ? Math.min(currentIndex, totalCards - 1) : 0;
   const currentCard = flashcards[safeIndex];
@@ -120,7 +121,7 @@ export default function FlashcardsPage({
           >
             Refresh Flashcards
           </button>
-          <p className="text-zinc-600">{flashcards.length} word{flashcards.length !== 1 ? 's' : ''} to study</p>
+          <p className="text-zinc-600">{words.length} word{words.length !== 1 ? 's' : ''} to study</p>
 
           {/* Toggle front mode: word first or definition first */}
           <div className="inline-flex rounded-xl border border-zinc-200 bg-zinc-50 p-1">
