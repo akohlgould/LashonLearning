@@ -152,18 +152,25 @@ export default function Flashcard({
                     {(Array.isArray(sources)
                       ? sources.length
                       : Object.keys(sources).length) > 1 && (
-                      <button
-                        type="button"
+                      <span
+                        role="button"
+                        tabIndex={0}
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowAllSources((prev) => !prev);
                         }}
-                        className="text-xs font-medium text-primary hover:underline self-center"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.stopPropagation();
+                            setShowAllSources((prev) => !prev);
+                          }
+                        }}
+                        className="text-xs font-medium text-primary hover:underline self-center cursor-pointer"
                       >
                         {showAllSources
                           ? "Show less"
                           : `View ${(Array.isArray(sources) ? sources.length : Object.keys(sources).length) - 1} more source${(Array.isArray(sources) ? sources.length : Object.keys(sources).length) - 1 === 1 ? "" : "s"}`}
-                      </button>
+                      </span>
                     )}
                   </div>
                 </div>

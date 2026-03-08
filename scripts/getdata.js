@@ -1,3 +1,11 @@
+const SEFARIA_BASE = "https://www.sefaria.org";
+const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
+
+function sefariaUrl(path) {
+        if (isLocal) return path;
+        return `https://corsproxy.io/?${encodeURIComponent(SEFARIA_BASE + path)}`;
+}
+
 // function to process a word using all the functions below and return the data to be used in the app
 export async function getData(word) {
         
@@ -7,7 +15,7 @@ export async function getData(word) {
 // function to get the default translation of a word
 async function getDefinition(word) {
         try {
-                const url = "https://www.sefaria.org/api/words/" + encodeURIComponent(word);
+                const url = sefariaUrl("/api/words/" + encodeURIComponent(word));
                 const data = await fetch(url);
                 const jsonData = await data.json();
 
@@ -26,7 +34,7 @@ async function getDefinition(word) {
 
 // function to get 
 async function getVerses(wordtoSearch){ 
-        const url = "https://www.sefaria.org/api/search-wrapper";
+        const url = sefariaUrl("/api/search-wrapper");
   
         const body = {
                 "query": wordtoSearch,
