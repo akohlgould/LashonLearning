@@ -38,7 +38,7 @@ async function getVerses(wordtoSearch){
                 const data = await response.json();
                 const verses = [];
                 for (let i = 0; i < data.hits.hits.length; i++) {
-                        verses.push(data.hits.hits[i]._id + ": " + data.hits.hits[i].highlight.naive_lemmatizer);
+                        verses.push({ [data.hits.hits[i]._id]: data.hits.hits[i].highlight.naive_lemmatizer });
                 }
                 return verses;
         } catch (err) {
@@ -46,7 +46,7 @@ async function getVerses(wordtoSearch){
         }
 }
 
-// // testing the function
+// // testing the function yt to file
 // async function main() {
 //         const word = "אמר";
 
@@ -64,3 +64,31 @@ async function getVerses(wordtoSearch){
         
 // }
 // main();
+
+
+import fs from 'fs';
+// testing function to json file
+async function main() {
+        const result = [];
+        const words = ["אמר", "דבר", "עשה", "ראה", "שמע", "הלך", "בא", "נתן", "לקח", "אמרו"];
+        for(let i = 0; i < words.length; i++) {
+                const data = await getData(words[i]);
+                const jsonData = JSON.stringify(data, null, 2);
+                console.log(jsonData);
+                result.push(data);
+        }
+
+        const finalJson = {cards : result};
+        console.log(JSON.stringify(finalJson, null, 2));
+        
+        fs.writeFile('example.json', JSON.stringify(finalJson, null, 2), (err) => {
+                if (err) {
+                        console.error('Error writing to file:', err);
+                } else {
+                        console.log('Data successfully written to output.json');
+                }
+        });
+        
+}
+main();
+

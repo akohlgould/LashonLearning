@@ -3,7 +3,10 @@
     {
       "word": "string",
       "definition": "string",
-      "verses": "array of verse texts"
+      "verses": [
+        {
+          "verse_id": "string"      }
+      ]
     }
   ]
 }
