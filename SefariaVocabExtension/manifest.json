@@ -12,6 +12,9 @@
     "service_worker": "background.js"
   },
   "externally_connectable": {
-    "matches": ["http://localhost/*"]
+    "matches": [
+      "http://localhost/*",
+      "https://akohlgould.github.io/*"
+    ]
   }
 }
