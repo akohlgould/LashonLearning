@@ -1,14 +1,20 @@
-import data from "./data.json";
+import { getData } from "./getdata.js";
 
 function exportToAnki(data) {
   const cards = data.cards;
   const tsv = "";
   for (const card of cards) {
-    const index = Math.floor(Math.random() * card.verses.length);
-    const back = `${card.definition}\n${card.verses[index]}`;
+    const back = `${card.definition}\n${card.randomVerse}`;
     tsv.concat(`${card.word}\t${back}\n`);
   }
   return tsv;
 }
 
-console.log(exportToAnki(data));
+async function main() {
+  const entry = await getData("תורה");
+  const data = { cards: [entry] };
+  console.log(data);
+  console.log(exportToAnki(data));
+}
+
+main();
