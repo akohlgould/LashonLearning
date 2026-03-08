@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const appUrlBtn = document.getElementById("open-app");
+  
+  appUrlBtn.addEventListener("click", () => {
+    chrome.tabs.create({ url: "https://akohlgould.github.io/LashonLearning/" });
+  });
+
   const wordList = document.getElementById("word-list");
   const wordCount = document.getElementById("word-count");
 

@@ -13,9 +13,8 @@ LashonLearning helps Hebrew learners build vocabulary by:
 - Providing a modern, responsive web interface for studying
 
 
-## Components
 
-### 1. Chrome Extension: Flashcard Word Grabber
+###  Chrome Extension 
 
 A lightweight Chrome extension that integrates with Sefaria.org to capture Hebrew vocabulary.
 
