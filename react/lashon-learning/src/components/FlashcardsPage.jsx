@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, RotateCcw } from "lucide-react";
 import Flashcard from "./Flashcard";
-import { exportToAnki } from "../../../../AnkiExport";
+import { exportToAnki } from "../../../../scripts/AnkiExport";
 
 export default function FlashcardsPage() {
   const flashcards = useMemo(
@@ -32,7 +32,7 @@ export default function FlashcardsPage() {
         verses: ["Psalm 119:105", "Deuteronomy 4:44"],
       },
     ],
-    []
+    [],
   );
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -179,7 +179,7 @@ export default function FlashcardsPage() {
 
         <button
           type="button"
-          onClick={() => exportToAnki({cards: flashcards})}
+          onClick={() => exportToAnki({ cards: flashcards })}
           className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
         >
           <Download size={16} />
@@ -188,32 +188,32 @@ export default function FlashcardsPage() {
       </div>
 
       <div className="flex flex-1 items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={goBack}
-            className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50"
-            aria-label="Previous flashcard"
-          >
-            <ChevronLeft size={22} />
-          </button>
+        <button
+          type="button"
+          onClick={goBack}
+          className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50"
+          aria-label="Previous flashcard"
+        >
+          <ChevronLeft size={22} />
+        </button>
 
-            <Flashcard
-              key={cardKey}
-              word={currentCard.word}
-              definition={currentCard.definition}
-              sources={currentCard.verses}
-              frontMode={frontMode}
-              className="w-full"
-            />
+        <Flashcard
+          key={cardKey}
+          word={currentCard.word}
+          definition={currentCard.definition}
+          sources={currentCard.verses}
+          frontMode={frontMode}
+          className="w-full"
+        />
 
-          <button
-            type="button"
-            onClick={goNext}
-            className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50"
-            aria-label="Next flashcard"
-          >
-            <ChevronRight size={22} />
-          </button>
+        <button
+          type="button"
+          onClick={goNext}
+          className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50"
+          aria-label="Next flashcard"
+        >
+          <ChevronRight size={22} />
+        </button>
       </div>
 
       <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
@@ -229,7 +229,9 @@ export default function FlashcardsPage() {
                 setCardKey((prev) => prev + 1);
               }}
               className={`h-2.5 rounded-full transition-all ${
-                isActive ? "w-8 bg-zinc-900" : "w-2.5 bg-zinc-300 hover:bg-zinc-400"
+                isActive
+                  ? "w-8 bg-zinc-900"
+                  : "w-2.5 bg-zinc-300 hover:bg-zinc-400"
               }`}
               aria-label={`Go to card ${index + 1}`}
             />
