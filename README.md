@@ -1,4 +1,5 @@
 # LashonLearning
+Created by brandeis students: Adam Gould, Adam Heany, Oneg Kaufman-Grob, and Rafi Hamermesh 
 
 **LashonLearning** is a comprehensive Hebrew vocabulary learning platform that integrates with Sefaria's extensive Jewish text database. The system combines a Chrome browser extension, a React web application, and a Cloudflare Workers proxy to create an intelligent flashcard system powered by real Biblical and Rabbinic text examples.
 
