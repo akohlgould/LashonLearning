@@ -7,12 +7,17 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
+// Strip nekudot (vowel points) and taamim (cantillation marks) from Hebrew text
+function cleanHebrew(text) {
+  return text.replace(/[\u0591-\u05BD\u05BF-\u05C7]/g, "");
+}
+
 // Listen for the click
 // background.js
 chrome.contextMenus.onClicked.addListener((info) => {
   if (info.menuItemId === "addWord") {
     // Trim whitespace but DON'T use toLowerCase() for Hebrew
-    const word = info.selectionText.trim();
+    const word = cleanHebrew(info.selectionText.trim());
 
     chrome.storage.local.get({ wordList: [] }, (data) => {
       // Check for duplicates
