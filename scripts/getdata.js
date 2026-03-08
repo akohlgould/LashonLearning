@@ -15,7 +15,7 @@ export async function getData(word) {
 // function to get the default translation of a word
 async function getDefinition(word) {
         try {
-                const url = sefariaUrl("/api/words/" + encodeURIComponent(word));
+                const url = "https://www.sefaria.org/api/words/" + encodeURIComponent(word);
                 const data = await fetch(url);
                 const jsonData = await data.json();
 
