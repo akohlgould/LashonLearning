@@ -3,13 +3,11 @@ import Header from './components/Header'
 import FlashcardsPage from './pages/FlashcardsPage'
 import WordlistPage from './pages/wordlistPage'
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
-import { generateCards } from '../../../scripts/generateCards'
 
 const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
 
 function App() {
   const [words, setWords] = useState([]);
-  const [flashcards, setFlashcards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [emptyReason, setEmptyReason] = useState("");
 
@@ -20,29 +18,19 @@ function App() {
       chrome.runtime.sendMessage(
         EXTENSION_ID,
         { action: "getFlashcards" },
-        async (response) => {
+        (response) => {
           if (chrome.runtime.lastError) {
             console.error("Sync failed:", chrome.runtime.lastError.message);
             setWords([]);
-            setFlashcards([]);
             setEmptyReason("extension-error");
           } else if (response?.success) {
             const wordStrings = response.data.map((item) =>
               typeof item === "object" ? item.word : item,
             );
             setWords(wordStrings);
-
-            if (wordStrings.length === 0) {
-              setFlashcards([]);
-              setEmptyReason("no-words");
-            } else {
-              const cards = await generateCards(wordStrings);
-              setFlashcards(cards);
-              setEmptyReason("");
-            }
+            setEmptyReason(wordStrings.length === 0 ? "no-words" : "");
           } else {
             setWords([]);
-            setFlashcards([]);
             setEmptyReason("extension-error");
           }
           setLoading(false);
@@ -53,34 +41,18 @@ function App() {
       if (stored) {
         const wordList = JSON.parse(stored);
         setWords(wordList);
-        if (wordList.length > 0) {
-          const cards = await generateCards(wordList);
-          setFlashcards(cards);
-          setEmptyReason("");
-        } else {
-          setFlashcards([]);
-          setEmptyReason("no-words");
-        }
+        setEmptyReason(wordList.length === 0 ? "no-words" : "");
       } else {
         setWords([]);
-        setFlashcards([]);
         setEmptyReason("no-words");
       }
       setLoading(false);
     }
   }, []);
 
-  const generateFromWords = useCallback(async (wordList) => {
-    setLoading(true);
+  const updateWords = useCallback((wordList) => {
     setWords(wordList);
-    if (wordList.length > 0) {
-      const cards = await generateCards(wordList);
-      setFlashcards(cards);
-      setEmptyReason("");
-    } else {
-      setFlashcards([]);
-    }
-    setLoading(false);
+    setEmptyReason(wordList.length === 0 ? "no-words" : "");
   }, []);
 
   // Fetch on app mount
@@ -96,11 +68,10 @@ function App() {
           path="/"
           element={
             <FlashcardsPage
-              flashcards={flashcards}
+              words={words}
               loading={loading}
               emptyReason={emptyReason}
               syncFromExtension={syncFromExtension}
-              generateFromWords={generateFromWords}
             />
           }
         />
@@ -109,10 +80,9 @@ function App() {
           element={
             <WordlistPage
               words={words}
-              flashcards={flashcards}
               loading={loading}
               syncFromExtension={syncFromExtension}
-              generateFromWords={generateFromWords}
+              updateWords={updateWords}
             />
           }
         />
