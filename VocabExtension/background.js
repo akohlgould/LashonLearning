@@ -71,6 +71,31 @@ chrome.runtime.onMessageExternal.addListener(
         });
       });
       return true;
+    } else if (request.action === "importWords") {
+      // Accepts { words: string[], mode: 'merge'|'replace' }
+      const incoming = Array.isArray(request.words) ? request.words : [];
+      const mode = request.mode === "replace" ? "replace" : "merge";
+      // clean and dedupe words
+      const cleaned = incoming
+        .map((w) => cleanHebrew(w.trim()))
+        .filter(Boolean);
+      chrome.storage.local.get({ wordList: [] }, (data) => {
+        let updatedList;
+        if (mode === "replace") {
+          updatedList = cleaned.map((w) => ({ word: w, date: new Date().toISOString() }));
+        } else {
+          const existingSet = new Set(data.wordList.map((item) => item.word));
+          const toAdd = cleaned.filter((w) => !existingSet.has(w));
+          updatedList = [
+            ...data.wordList,
+            ...toAdd.map((w) => ({ word: w, date: new Date().toISOString() })),
+          ];
+        }
+        chrome.storage.local.set({ wordList: updatedList }, () => {
+          sendResponse({ success: true, data: updatedList });
+        });
+      });
+      return true;
     }
   },
 );
