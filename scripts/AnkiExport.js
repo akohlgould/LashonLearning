@@ -21,6 +21,7 @@ async function convertToTSV(data) {
 }
 
 export async function exportToAnki(data) {
+  try{
   console.log(data);
   const tsv = await convertToTSV(data);
   const blob = new Blob([tsv], { type: "text/tab-separated-values" });
