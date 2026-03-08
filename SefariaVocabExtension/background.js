@@ -38,6 +38,31 @@ chrome.runtime.onMessageExternal.addListener(
         sendResponse({ success: true, data: data.wordList });
       });
       return true; // Keeps the channel open for the async response
+    } else if (request.action === "addWord") {
+      const word = cleanHebrew(request.word.trim());
+      chrome.storage.local.get({ wordList: [] }, (data) => {
+        if (data.wordList.some((item) => item.word === word)) {
+          sendResponse({ success: false, message: "Word already exists" });
+          return;
+        }
+        const updatedList = [
+          ...data.wordList,
+          { word: word, date: new Date().toISOString() },
+        ];
+        chrome.storage.local.set({ wordList: updatedList }, () => {
+          sendResponse({ success: true, data: updatedList });
+        });
+      });
+      return true;
+    } else if (request.action === "removeWord") {
+      const word = cleanHebrew(request.word.trim());
+      chrome.storage.local.get({ wordList: [] }, (data) => {
+        const updatedList = data.wordList.filter((item) => item.word !== word);
+        chrome.storage.local.set({ wordList: updatedList }, () => {
+          sendResponse({ success: true, data: updatedList });
+        });
+      });
+      return true;
     }
   },
 );

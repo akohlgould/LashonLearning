@@ -13,13 +13,16 @@ export default function WordlistPage({
   const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
 
   const removeWord = async (wordToRemove) => {
-    if (typeof chrome !== "undefined" && chrome.storage) {
-      chrome.storage.local.get({ wordList: [] }, (data) => {
-        const updatedList = data.wordList.filter((item) => item.word !== wordToRemove);
-        chrome.storage.local.set({ wordList: updatedList }, async () => {
-          const updatedWords = updatedList.map(item => typeof item === 'object' ? item.word : item);
-          await generateFromWords(updatedWords);
-        });
+    if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
+      chrome.runtime.sendMessage(EXTENSION_ID, { action: "removeWord", word: wordToRemove }, async (response) => {
+        let updatedWords;
+        if (response && response.success) {
+          updatedWords = response.data.map(item => item.word);
+        } else {
+          updatedWords = words.filter(w => w !== wordToRemove);
+        }
+        localStorage.setItem('wordList', JSON.stringify(updatedWords));
+        await generateFromWords(updatedWords);
       });
     } else {
       const updatedWords = words.filter(w => w !== wordToRemove);
@@ -30,21 +33,18 @@ export default function WordlistPage({
 
   const addWord = async () => {
     if (newWord.trim()) {
-      if (typeof chrome !== "undefined" && chrome.storage) {
-        chrome.storage.local.get({ wordList: [] }, (data) => {
-          if (data.wordList.some((item) => item.word === newWord.trim())) {
-            return;
-          }
-
-          const updatedList = [
-            ...data.wordList,
-            { word: newWord.trim(), date: new Date().toISOString() },
-          ];
-          chrome.storage.local.set({ wordList: updatedList }, async () => {
-            const updatedWords = updatedList.map(item => typeof item === 'object' ? item.word : item);
+      if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
+        chrome.runtime.sendMessage(EXTENSION_ID, { action: "addWord", word: newWord.trim() }, async (response) => {
+          let updatedWords;
+          if (response && response.success) {
+            updatedWords = response.data.map(item => item.word);
             setNewWord("");
-            await generateFromWords(updatedWords);
-          });
+          } else {
+            updatedWords = [...words, newWord.trim()];
+            setNewWord("");
+          }
+          localStorage.setItem('wordList', JSON.stringify(updatedWords));
+          await generateFromWords(updatedWords);
         });
       } else {
         if (words.includes(newWord.trim())) return;
