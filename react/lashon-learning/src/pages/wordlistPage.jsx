@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState } from "react";
 import { Trash2, RefreshCw, Plus } from "lucide-react";
 
 export default function WordlistPage({
@@ -9,17 +9,8 @@ export default function WordlistPage({
   generateFromWords,
 }) {
   const [newWord, setNewWord] = useState("");
-  const hasSynced = useRef(false);
 
   const EXTENSION_ID = "nlcebalffaibfcnohbknmgpkdoedliej";
-
-  // Initial fetch on first mount only
-  useEffect(() => {
-    if (!hasSynced.current && words.length === 0) {
-      hasSynced.current = true;
-      syncFromExtension();
-    }
-  }, [syncFromExtension, words.length]);
 
   const removeWord = async (wordToRemove) => {
     if (typeof chrome !== "undefined" && chrome.storage) {

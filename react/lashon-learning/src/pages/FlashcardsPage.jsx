@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 import Flashcard from "../components/Flashcard";
 import { exportToAnki } from "../../../../scripts/AnkiExport";
@@ -15,15 +15,6 @@ export default function FlashcardsPage({
   const [cardKey, setCardKey] = useState(0);
   const [customWords, setCustomWords] = useState("");
   const [useCustom, setUseCustom] = useState(false);
-  const hasSynced = useRef(false);
-
-  // Initial fetch on first mount only
-  useEffect(() => {
-    if (!hasSynced.current) {
-      hasSynced.current = true;
-      syncFromExtension();
-    }
-  }, [syncFromExtension]);
 
   const handleRefresh = async () => {
     setCurrentIndex(0);
