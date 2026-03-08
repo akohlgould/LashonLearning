@@ -41,11 +41,11 @@ export default function Flashcard({
     : String(word || "");
 
   return (
-    <div className={`w-full max-w-2xl ${className}`}>
+    <div className={`w-full max-w-2xl ${className} h-fit`}>
       <button
         type="button"
         onClick={() => setShowBack((prev) => !prev)}
-        className="group relative h-[28rem] w-full rounded-3xl text-left outline-none transition-transform duration-150 hover:scale-[1.01] cursor-pointer"
+        className="group relative h-[25rem] w-full rounded-3xl text-left outline-none transition-transform duration-150 hover:scale-[1.01] cursor-pointer"
       >
         {/* Card background styling */}
         <div className="absolute inset-0 rounded-3xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.08)] ring-1 ring-black/5" />

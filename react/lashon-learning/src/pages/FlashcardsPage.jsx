@@ -112,7 +112,7 @@ export default function FlashcardsPage({
     <div className="mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col px-4 py-8 sm:px-6">
       
       {/* Settings Bar */}
-      <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-center gap-3">
           {/* Refresh button reloads cards */}
           <button
@@ -157,7 +157,7 @@ export default function FlashcardsPage({
       </div>
 
       {/* Main Flashcard Display Area */}
-      <div className="flex flex-1 items-center justify-center gap-3 sm:gap-6">
+      <div className="flex items-center justify-center gap-5 mt-12">
         {cardLoading ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
@@ -171,7 +171,7 @@ export default function FlashcardsPage({
             <button
               type="button"
               onClick={goBack}
-              className="inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
+              className="inline-flex h-16 w-16 hover:scale-[1.05] transition-all flex-shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
               aria-label="Previous flashcard"
             >
               <ChevronLeft size={24} />
@@ -189,7 +189,7 @@ export default function FlashcardsPage({
             <button
               type="button"
               onClick={goNext}
-              className="inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
+              className="inline-flex h-16 w-16 hover:scale-[1.05] transition-all flex-shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition hover:bg-zinc-50 active:scale-95"
               aria-label="Next flashcard"
             >
               <ChevronRight size={24} />
@@ -209,7 +209,7 @@ export default function FlashcardsPage({
 
       {/* Navigation Dot Indicators */}
       {totalCards > 0 && (
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
           {words.map((_, index) => (
             <button
               key={index}
